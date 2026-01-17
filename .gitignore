@@ -27,3 +27,4 @@
 
 # Ignore zip files
 *.zip
+.vscode/settings.json
