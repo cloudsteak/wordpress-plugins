@@ -23,3 +23,10 @@
 /app/Config/core.php
 /app/Config/database.php
 /vendors/*
+
+
+# Ignore zip files
+*.zip
+
+# Ignore IDE specific files
+.vscode/settings.json
