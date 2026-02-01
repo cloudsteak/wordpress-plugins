@@ -26,11 +26,9 @@ build:
 		exit 1; \
 	fi; \
 	i=1; \
-	declare -A plugin_map; \
 	for plugin in $$plugins; do \
 		if [ -f "$$plugin/$$plugin.php" ]; then \
 			echo "  $(GREEN)$$i)$(NC) $$plugin"; \
-			plugin_map[$$i]=$$plugin; \
 			i=$$((i+1)); \
 		fi; \
 	done; \
@@ -63,7 +61,7 @@ build:
 		echo "$(YELLOW)Hiba: $$plugin_file nem található!$(NC)"; \
 		exit 1; \
 	fi; \
-	version=$$(grep -i "^Version:" "$$plugin_file" | head -n1 | awk '{print $$2}' | tr -d '\r'); \
+	version=$$(grep -i "Version:" "$$plugin_file" | head -n1 | sed 's/.*Version:[[:space:]]*//' | sed 's/[[:space:]]*$$//' | tr -d '\r'); \
 	if [ -z "$$version" ]; then \
 		echo "$(YELLOW)Hiba: Nem található verzió információ a $$plugin_file fájlban!$(NC)"; \
 		exit 1; \
