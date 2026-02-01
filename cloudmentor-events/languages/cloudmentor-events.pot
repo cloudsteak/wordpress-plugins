@@ -1,0 +1,189 @@
+# CloudMentor Events Translation Template
+# Copyright (C) 2026 CloudMentor
+# This file is distributed under the GPL v2 or later.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CloudMentor Events 1.0.7\n"
+"Report-Msgid-Bugs-To: https://github.com/cloudsteak/wordpress-plugins/cloudmentor-events\n"
+"POT-Creation-Date: 2026-01-30 12:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: includes/class-cme-post-type.php
+msgid "Cloud Események"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Cloud Esemény"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Új hozzáadása"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Új esemény hozzáadása"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Platform Kategóriák"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Platform Kategória"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Esemény Típusok"
+msgstr ""
+
+#: includes/class-cme-post-type.php
+msgid "Esemény Típus"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Esemény részletei"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Esemény dátuma"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Határidő típusa"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Hard (kötelező határidő)"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Soft (ajánlott határidő)"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Optional (opcionális)"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Részletes leírás"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Forrás URL"
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Nincs közelgő esemény."
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Kötelező határidő"
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Ajánlott határidő"
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Opcionális"
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Hasznos link"
+msgstr ""
+
+#: includes/class-cme-widget.php
+msgid "CloudMentor Események"
+msgstr ""
+
+#: includes/class-cme-widget.php
+msgid "Közelgő események"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "CloudMentor Events Beállítások"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Beállítások mentése"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Megjelenítési beállítások"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Stílus beállítások"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Események száma"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Dátum formátum"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Magyar (2026.02.01.)"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "ISO (2026-02-01)"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Relatív (5 nap múlva)"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Színséma"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Alapértelmezett (világos)"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Sötét mód"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Minimalista"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Színes"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Animáció"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Csúsztatás"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Halványítás"
+msgstr ""
+
+#: includes/class-cme-settings.php
+msgid "Nincs animáció"
+msgstr ""
+
+#: assets/js/frontend.js
+msgid "Részletek megjelenítése"
+msgstr ""
+
+#: assets/js/frontend.js
+msgid "Részletek elrejtése"
+msgstr ""

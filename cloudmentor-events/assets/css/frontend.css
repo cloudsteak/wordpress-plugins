@@ -1,0 +1,613 @@
+/**
+ * CloudMentor Events - Frontend Styles
+ *
+ * @package CloudMentor_Events
+ */
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
+.cme-events-list {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 100%;
+}
+
+.cme-no-events {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 6px;
+    font-style: italic;
+}
+
+/* ==========================================================================
+   Event Item
+   ========================================================================== */
+
+.cme-event-item {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cme-event-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: #c0c0c0;
+}
+
+.cme-event-item:last-child {
+    margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Event Header (Clickable area)
+   ========================================================================== */
+
+.cme-event-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+}
+
+.cme-event-header:hover {
+    background-color: #f8f9fa;
+}
+
+.cme-event-header:focus {
+    outline: 2px solid #0073aa;
+    outline-offset: -2px;
+}
+
+/* Date */
+.cme-event-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.cme-date-text {
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Deadline Indicator (icon only, color-coded) */
+.cme-deadline-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: help;
+}
+
+.cme-deadline-indicator svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Hard = Red with exclamation mark */
+.cme-deadline-indicator.cme-deadline-hard {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Soft = Yellow/Orange with warning triangle */
+.cme-deadline-indicator.cme-deadline-soft {
+    background: #ffc107;
+    color: #000;
+}
+
+/* Optional = Green (no icon, just colored dot) */
+.cme-deadline-indicator.cme-deadline-optional {
+    background: #28a745;
+    color: #fff;
+}
+
+/* Meta (Category + Type tags) */
+.cme-event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.cme-event-category,
+.cme-event-type {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Category colors */
+.cme-event-category {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.cme-category-azure {
+    background: #e3f2fd;
+    color: #0078d4;
+}
+
+.cme-category-aws {
+    background: #fff3e0;
+    color: #ff9900;
+}
+
+.cme-category-gcp {
+    background: #e8f5e9;
+    color: #34a853;
+}
+
+/* Type colors */
+.cme-event-type {
+    background: #f5f5f5;
+    color: #616161;
+}
+
+.cme-type-uj {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.cme-type-beallitas {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.cme-type-biztonsag {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.cme-type-kivezetes,
+.cme-type-megszunik {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.cme-type-frissites {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.cme-type-migracio {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+/* Title */
+.cme-event-title {
+    flex: 1;
+    min-width: 150px;
+    font-weight: 500;
+    color: #1a1a1a;
+    font-size: 14px;
+}
+
+/* Toggle icon */
+.cme-event-toggle {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: transform 0.2s ease;
+}
+
+.cme-event-item.is-expanded .cme-event-toggle {
+    transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Event Details (Expandable content)
+   ========================================================================== */
+
+.cme-event-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    background: #fafbfc;
+    border-top: 0 solid #e0e0e0;
+}
+
+.cme-event-item.is-expanded .cme-event-details {
+    max-height: 700px;
+    padding: 20px;
+    border-top-width: 1px;
+}
+
+.cme-event-description {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.cme-event-description p:last-child {
+    margin-bottom: 0;
+}
+
+.cme-event-source {
+    margin-bottom: 12px;
+}
+
+.cme-source-link {
+    display: inline-flex;
+    align-items: center;
+    color: #0073aa;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: #e7f3ff;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.cme-source-link:hover {
+    background: #cce5ff;
+    color: #005177;
+}
+
+.cme-deadline-info {
+    font-size: 12px;
+    padding: 10px 12px;
+    background: #fff;
+    border-radius: 4px;
+    border-left: 3px solid #666;
+    color: #555;
+}
+
+.cme-deadline-info-hard {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.cme-deadline-info-soft {
+    border-left-color: #ffc107;
+    background: #fffbf0;
+}
+
+.cme-deadline-info-optional {
+    border-left-color: #28a745;
+    background: #f0fff4;
+}
+
+/* ==========================================================================
+   Urgency Indicators
+   ========================================================================== */
+
+.cme-urgency-critical {
+    border-left: 4px solid #dc3545;
+}
+
+.cme-urgency-critical .cme-date-text {
+    color: #dc3545;
+}
+
+.cme-urgency-soon {
+    border-left: 4px solid #fd7e14;
+}
+
+.cme-urgency-soon .cme-date-text {
+    color: #fd7e14;
+}
+
+.cme-urgency-upcoming {
+    border-left: 4px solid #ffc107;
+}
+
+/* Today: special pulsing warning - NOT crossed out! */
+.cme-urgency-today {
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(90deg, #fff5f5 0%, #fff 100%);
+    animation: cme-pulse-today 2s ease-in-out infinite;
+}
+
+.cme-urgency-today .cme-date-text {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.cme-urgency-today .cme-date-text::after {
+    content: " ⚠️";
+    font-size: 12px;
+}
+
+@keyframes cme-pulse-today {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+}
+
+/* Past/Archived: yesterday or earlier */
+.cme-urgency-past {
+    border-left: 4px solid #6c757d;
+    opacity: 0.7;
+}
+
+.cme-urgency-past .cme-date-text {
+    color: #6c757d;
+    text-decoration: line-through;
+}
+
+/* ==========================================================================
+   Color Schemes
+   ========================================================================== */
+
+/* Dark scheme */
+.cme-scheme-dark .cme-event-item {
+    background: #1e1e1e;
+    border-color: #333;
+}
+
+.cme-scheme-dark .cme-event-header:hover {
+    background-color: #2a2a2a;
+}
+
+.cme-scheme-dark .cme-date-text {
+    color: #e0e0e0;
+}
+
+.cme-scheme-dark .cme-event-title {
+    color: #f0f0f0;
+}
+
+.cme-scheme-dark .cme-event-details {
+    background: #252525;
+    border-color: #333;
+}
+
+.cme-scheme-dark .cme-event-description {
+    color: #ccc;
+}
+
+.cme-scheme-dark .cme-source-link {
+    background: #2d4a5e;
+    color: #8ecaff;
+}
+
+.cme-scheme-dark .cme-deadline-info {
+    background: #2a2a2a;
+    color: #bbb;
+}
+
+.cme-scheme-dark .cme-no-events {
+    background: #1e1e1e;
+    color: #999;
+}
+
+/* Minimal scheme */
+.cme-scheme-minimal .cme-event-item {
+    border: none;
+    border-bottom: 1px solid #eee;
+    border-radius: 0;
+}
+
+.cme-scheme-minimal .cme-event-item:last-child {
+    border-bottom: none;
+}
+
+.cme-scheme-minimal .cme-event-category,
+.cme-scheme-minimal .cme-event-type {
+    background: transparent;
+    border: 1px solid currentColor;
+}
+
+.cme-scheme-minimal .cme-event-details {
+    background: transparent;
+}
+
+/* Colorful scheme */
+.cme-scheme-colorful .cme-event-item {
+    border-width: 2px;
+}
+
+.cme-scheme-colorful .cme-urgency-critical {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+}
+
+.cme-scheme-colorful .cme-urgency-soon {
+    border-color: #fd7e14;
+    background: linear-gradient(135deg, #fff8f0 0%, #fff 100%);
+}
+
+.cme-scheme-colorful .cme-urgency-upcoming {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #fffef5 0%, #fff 100%);
+}
+
+/* ==========================================================================
+   Animation Variants
+   ========================================================================== */
+
+/* Fade animation */
+.cme-animation-fade .cme-event-details {
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s ease-out;
+    opacity: 0;
+}
+
+.cme-animation-fade .cme-event-item.is-expanded .cme-event-details {
+    opacity: 1;
+}
+
+/* No animation */
+.cme-animation-none .cme-event-details,
+.cme-animation-none .cme-event-toggle {
+    transition: none;
+}
+
+/* ==========================================================================
+   Widget Specific Styles
+   ========================================================================== */
+
+.cme-widget-list {
+    min-width: 300px;
+}
+
+.cme-widget-list .cme-event-item {
+    margin-bottom: 8px;
+}
+
+.cme-widget-list .cme-event-header {
+    padding: 10px 12px;
+    gap: 8px;
+}
+
+.cme-widget-list .cme-event-title {
+    font-size: 13px;
+}
+
+.cme-widget-list .cme-event-category,
+.cme-widget-list .cme-event-type {
+    font-size: 10px;
+    padding: 2px 6px;
+}
+
+.cme-widget-list .cme-event-item.is-expanded .cme-event-details {
+    padding: 16px;
+    max-height: 800px;
+}
+
+/* ==========================================================================
+   Themify Compatibility
+   ========================================================================== */
+
+.themify-compat.cme-events-list {
+    box-sizing: border-box;
+}
+
+.themify-compat .cme-event-item,
+.themify-compat .cme-event-item * {
+    box-sizing: border-box;
+}
+
+/* Reset Themify default margins */
+.themify-compat .cme-event-description p {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 600px) {
+    .cme-event-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .cme-event-date {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .cme-event-meta {
+        width: 100%;
+    }
+
+    .cme-event-title {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .cme-event-toggle {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    .cme-event-item {
+        position: relative;
+    }
+
+    /* Mobile: larger details container */
+    .cme-event-item.is-expanded .cme-event-details {
+        max-height: 1000px;
+        padding: 16px;
+        overflow-y: auto;
+    }
+
+    .cme-event-description {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .cme-deadline-info {
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+
+    .cme-event-header {
+        padding-right: 40px;
+    }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .cme-event-details,
+    .cme-event-toggle,
+    .cme-event-item,
+    .cme-source-link {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .cme-event-item {
+        border-width: 2px;
+    }
+
+    .cme-event-category,
+    .cme-event-type,
+    .cme-deadline-badge {
+        border: 1px solid currentColor;
+    }
+}
+
+/* Print styles */
+@media print {
+    .cme-event-toggle {
+        display: none;
+    }
+
+    .cme-event-details {
+        max-height: none !important;
+        padding: 12px !important;
+        border-top-width: 1px !important;
+    }
+
+    .cme-event-item {
+        break-inside: avoid;
+    }
+}

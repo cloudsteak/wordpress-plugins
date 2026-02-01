@@ -1,19 +1,19 @@
 <?php
-/*
-Plugin Name: Content Guard (CloudMentor)
-Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/content-guard
-Description: Oldalak és bejegyzések védelme — csak bejelentkezett felhasználók láthatják. Kivételként megadható néhány oldal és bejegyzés-kategória, illetve beállítható az átirányítás céloldala.
-Version: 0.0.5
-Author: CloudMentor
-Author URI: https://cloudmentor.hu
-License: MIT
-License URI: https://opensource.org/licenses/MIT
-Requires at least: 6.2
-Tested up to: 6.7.2
-Requires PHP: 8.0
-Text Domain: cloudmentor-content-guard
-Domain Path: /languages
-*/
+/**
+ * Plugin Name: Content Guard (CloudMentor)
+ * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/content-guard
+ * Description: Oldalak és bejegyzések védelme — csak bejelentkezett felhasználók láthatják. Kivételként megadható néhány oldal és bejegyzés-kategória, illetve beállítható az átirányítás céloldala.
+ * Version: 0.0.5
+ * Author: CloudMentor
+ * Author URI: https://cloudmentor.hu
+ * License: MIT
+ * License URI: https://opensource.org/licenses/MIT
+ * Requires at least: 6.2
+ * Tested up to: 6.7.2
+ * Requires PHP: 8.0
+ * Text Domain: cloudmentor-content-guard
+ * Domain Path: /languages
+ */
 
 
 if ( ! defined('ABSPATH') ) { exit; }

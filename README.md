@@ -6,7 +6,52 @@ Ez a tárhely különböző WordPress bővítményeket tartalmaz, amelyek külö
 
 ## Bővítmények listája
 
-### 1. Content Guard (CloudMentor)
+### 1. CloudMentor Events
+
+**Verzió:** 1.0.7  
+**Leírás:** Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
+
+#### Funkciók
+
+- **Custom Post Type:** Egyszerű eseménykezelés a WordPress adminban dedikált bejegyzés típussal
+- **Platform kategóriák:** Azure, AWS, GCP és egyéb felhő platformok szűrése
+- **Esemény típusok:** Új, Beállítás, Biztonság, Kivezetés, Megszűnik, és egyéb típusok megkülönböztetése
+- **Soft/Hard határidők:** Megkülönböztethető ajánlott és kötelező határidők kezelése
+- **Kompakt nézet:** Kattintásra lenyíló részletek a jobb áttekinthetőség érdekében
+- **Widget támogatás:** Sidebar-ban is elhelyezhető widget formában
+- **Shortcode támogatás:** Rugalmas beillesztés bárhová shortcode használatával
+- **Themify kompatibilis:** Teljes integráció Themify témákkal
+- **Reszponzív design:** Mobil-barát megjelenés minden eszközön
+- **Akadálymentesség:** ARIA támogatás és billentyűzet navigáció
+
+#### Shortcode használat
+
+Alapértelmezett megjelenítés:
+```
+[cloud-events]
+```
+
+Egyedi limittel:
+```
+[cloud-events limit="10"]
+```
+
+Szűrés platform szerint:
+```
+[cloud-events platform="azure"]
+```
+
+Widget formában a sidebar-ban is használható a "CloudMentor Events" widget hozzáadásával.
+
+#### Követelmények
+
+- WordPress 6.2 vagy újabb
+- PHP 8.0 vagy újabb
+- Tesztelve WordPress 6.7.2-ig
+
+---
+
+### 2. Content Guard (CloudMentor)
 
 **Verzió:** 0.0.5  
 **Leírás:** Tartalom védelmi plugin WordPress oldalakhoz és bejegyzésekhez
@@ -34,7 +79,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ---
 
-### 2. Lab Launcher (CloudMentor)
+### 3. Lab Launcher (CloudMentor)
 
 **Verzió:** 1.1.1  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
@@ -76,7 +121,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ## Licenc
 
-Mindkét bővítmény MIT licenc alatt érhető el.
+Mindhárom bővítmény MIT/GPL licenc alatt érhető el.
 
 
 
