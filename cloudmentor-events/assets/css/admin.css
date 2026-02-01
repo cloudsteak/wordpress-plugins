@@ -1,0 +1,231 @@
+/**
+ * CloudMentor Events - Admin Styles
+ *
+ * @package CloudMentor_Events
+ */
+
+/* ==========================================================================
+   Meta Box Styles
+   ========================================================================== */
+
+.cme-meta-box {
+    padding: 10px 0;
+}
+
+.cme-form-table {
+    width: 100%;
+}
+
+.cme-form-table th {
+    width: 150px;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+}
+
+.cme-form-table td {
+    padding: 15px 10px;
+}
+
+.cme-form-table label .required {
+    color: #d63638;
+    margin-left: 2px;
+}
+
+.cme-form-table .description {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 6px;
+}
+
+/* Datepicker field */
+.cme-datepicker {
+    width: 150px !important;
+}
+
+/* Tips box */
+.cme-meta-box-tips {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    border-radius: 0 4px 4px 0;
+}
+
+.cme-meta-box-tips h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.cme-meta-box-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.cme-meta-box-tips li {
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #50575e;
+}
+
+/* ==========================================================================
+   Admin Column Styles
+   ========================================================================== */
+
+.cme-date-past {
+    color: #a7aaad;
+    text-decoration: line-through;
+}
+
+.cme-date-urgent {
+    color: #d63638;
+    font-weight: 600;
+}
+
+.cme-date-soon {
+    color: #dba617;
+    font-weight: 500;
+}
+
+.cme-deadline-soft {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #fcf9e8;
+    color: #996800;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.cme-deadline-hard {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #fcf0f1;
+    color: #8a1f1f;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.cme-deadline-optional {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #ecf7ed;
+    color: #1e4620;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* ==========================================================================
+   Settings Page Styles
+   ========================================================================== */
+
+.cme-settings-wrap {
+    max-width: 1200px;
+}
+
+.cme-settings-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.cme-settings-main {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.cme-settings-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.cme-settings-box {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.cme-settings-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.cme-settings-box h4 {
+    margin: 15px 0 10px;
+    font-size: 13px;
+}
+
+.cme-settings-box code {
+    display: block;
+    padding: 8px 12px;
+    background: #f6f7f7;
+    border-radius: 3px;
+    font-size: 12px;
+    margin: 8px 0;
+    word-break: break-all;
+}
+
+.cme-settings-box ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.cme-settings-box ul li {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.cme-settings-box ul li code {
+    display: inline;
+    padding: 2px 5px;
+    margin: 0;
+}
+
+.cme-settings-box a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.cme-settings-box a:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+.cme-settings-box small {
+    color: #646970;
+}
+
+/* ==========================================================================
+   Responsive Admin Styles
+   ========================================================================== */
+
+@media (max-width: 960px) {
+    .cme-settings-container {
+        flex-direction: column;
+    }
+
+    .cme-settings-sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 782px) {
+    .cme-form-table th {
+        width: 100%;
+        display: block;
+        padding-bottom: 5px;
+    }
+
+    .cme-form-table td {
+        display: block;
+        padding-top: 0;
+    }
+}
