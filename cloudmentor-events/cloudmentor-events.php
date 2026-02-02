@@ -3,7 +3,7 @@
  * Plugin Name: CloudMentor Events
  * Plugin URI: https://github.com/cloudsteak/wordpress-plugins/cloudmentor-events
  * Description: Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: GPL v2 or later
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'CME_VERSION', '1.0.7' );
+define( 'CME_VERSION', '1.0.8' );
 define( 'CME_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CME_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'CME_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
