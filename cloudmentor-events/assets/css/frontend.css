@@ -321,12 +321,13 @@
 .cme-urgency-today {
     border-left: 4px solid #dc3545;
     background: linear-gradient(90deg, #fff5f5 0%, #fff 100%);
-    animation: cme-pulse-today 2s ease-in-out infinite;
+    animation: cme-pulse-today 2.5s ease-in-out infinite;
 }
 
 .cme-urgency-today .cme-date-text {
     color: #dc3545;
     font-weight: 700;
+    animation: cme-pulse-date 1.5s ease-in-out infinite;
 }
 
 .cme-urgency-today .cme-date-text::after {
@@ -334,12 +335,23 @@
     font-size: 12px;
 }
 
+/* Card pulse animation */
 @keyframes cme-pulse-today {
     0%, 100% {
         box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.2);
     }
     50% {
-        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.15);
+    }
+}
+
+/* Date text pulse animation - subtle opacity change */
+@keyframes cme-pulse-date {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
     }
 }
 

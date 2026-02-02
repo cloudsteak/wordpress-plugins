@@ -68,7 +68,7 @@ build:
 	fi; \
 	echo "$(BLUE)Verzió:$(NC) $$version"; \
 	echo ""; \
-	zip_name="$$selected_plugin-$$version.zip"; \
+	zip_name="$$selected_plugin.zip"; \
 	echo "$(BLUE)ZIP fájl készítése:$(NC) $$zip_name"; \
 	if [ -f "$$zip_name" ]; then \
 		rm "$$zip_name"; \
