@@ -8,7 +8,7 @@ Ez a tárhely különböző WordPress bővítményeket tartalmaz, amelyek külö
 
 ### 1. CloudMentor Events
 
-**Verzió:** 1.0.7  
+**Verzió:** 1.0.8  
 **Leírás:** Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
 
 #### Funkciók
