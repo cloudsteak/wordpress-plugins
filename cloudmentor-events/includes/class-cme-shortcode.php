@@ -400,7 +400,7 @@ class CME_Shortcode {
                 return date( 'Y-m-d', $timestamp );
 
             case 'relative':
-                $days = round( ( $timestamp - time() ) / DAY_IN_SECONDS );
+                $days = (int) round( ( $timestamp - strtotime( 'today' ) ) / DAY_IN_SECONDS );
                 if ( $days < 0 ) {
                     return sprintf(
                         _n( '%d napja', '%d napja', abs( $days ), 'cloudmentor-events' ),
@@ -436,12 +436,12 @@ class CME_Shortcode {
 
         $event_date  = strtotime( $date );
         $today       = strtotime( 'today' );
-        $days_until  = round( ( $event_date - $today ) / DAY_IN_SECONDS );
+        $days_until  = (int) round( ( $event_date - $today ) / DAY_IN_SECONDS );
 
         if ( $days_until < 0 ) {
             // Archived: yesterday or earlier
             return 'cme-urgency-past';
-        } elseif ( $days_until === 0 ) {
+        } elseif ( 0 === $days_until ) {
             // Today: special warning, not past!
             return 'cme-urgency-today';
         } elseif ( $days_until <= 7 ) {
@@ -468,11 +468,11 @@ class CME_Shortcode {
 
         $timestamp  = strtotime( $date );
         $now        = strtotime( 'today' );
-        $days       = round( ( $timestamp - $now ) / DAY_IN_SECONDS );
+        $days       = (int) round( ( $timestamp - $now ) / DAY_IN_SECONDS );
 
         if ( $days < 0 ) {
             $abs_days = abs( $days );
-            if ( $abs_days === 1 ) {
+            if ( 1 === $abs_days ) {
                 return __( 'Tegnap lejárt', 'cloudmentor-events' );
             }
             return sprintf(
@@ -480,9 +480,9 @@ class CME_Shortcode {
                 __( '%d napja lejárt', 'cloudmentor-events' ),
                 $abs_days
             );
-        } elseif ( $days === 0 ) {
+        } elseif ( 0 === $days ) {
             return __( 'Mai határidő', 'cloudmentor-events' );
-        } elseif ( $days === 1 ) {
+        } elseif ( 1 === $days ) {
             return __( 'Holnap', 'cloudmentor-events' );
         } else {
             return sprintf(
