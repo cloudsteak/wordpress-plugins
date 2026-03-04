@@ -100,7 +100,7 @@ function lab_launcher_render_shortcode($atts)
         $refresh_interval = intval(get_option('lab_launcher_settings')['status_refresh_interval'] ?? 30);
         $output .= '<script>window.labLauncherRefreshInterval = ' . $refresh_interval . ';</script>';
         $output .= '<table class="table-lab-result">';
-        $output .= '<tr>';
+                    // Removed duplicate declaration of copyIcon
         $output .= '<td><button id="lab-check-button" class="lab-check-button">Kész vagyok - Ellenőrzés <i class="fa-solid fa-check-double"></i></button></td>';
         $output .= '</tr>';
         $output .= '<tr>';
@@ -218,7 +218,12 @@ function lab_launcher_enqueue_script()
 
                         const data = await res.json();
 
-                        const copyIcon = (text) => `<button onclick="navigator.clipboard.writeText('${text.replace(/'/g, "\\'")}')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>`;
+                        if (typeof window.copyIcon !== 'function') {
+                            window.copyIcon = function (text) {
+                                var safeText = (typeof text === 'string') ? text : '';
+                                return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
+                            };
+                        }
 
                     if (res.ok) {
                         document.getElementById('lab-launch-button').innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
@@ -247,9 +252,9 @@ function lab_launcher_enqueue_script()
 
                         resultBox.innerHTML =
                             `<table class="table-lab-login"><tr>` +
-                            `<td>Felhasználónév: <strong>${username}</strong> ${copyIcon(username)}</td>` +
+                            `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
                             `<td>|</td>` +
-                            `<td>Jelszó: <strong>${password}</strong> ${copyIcon(password)}</td>` +
+                            `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
                             `<td>|</td>` +
                             `<td>${loginLink}</td>` +
                             `</tr><tr>` +
@@ -287,7 +292,12 @@ function lab_launcher_enqueue_script()
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
 
             if (username && password && loginLink && cloudProvider && resultBox) {
-                const copyIcon = (text) => `<button onclick="navigator.clipboard.writeText('${text.replace(/'/g, "\\'")}')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>`;
+                if (typeof window.copyIcon !== 'function') {
+                    window.copyIcon = function (text) {
+                        var safeText = (typeof text === 'string') ? text : '';
+                        return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
+                    };
+                }
 
                 let loginLink = '';
                 if (cloudProvider === 'azure') {
@@ -298,9 +308,9 @@ function lab_launcher_enqueue_script()
 
                 resultBox.innerHTML =
                     `<table class="table-lab-login"><tr>` +
-                    `<td>Felhasználónév: <strong>${username}</strong> ${copyIcon(username)}</td>` +
+                    `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
                     `<td>|</td>` +
-                    `<td>Jelszó: <strong>${password}</strong> ${copyIcon(password)}</td>` +
+                    `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
                     `<td>|</td>` +
                     `<td>${loginLink}</td>` +
                     `</tr><tr>` +
