@@ -303,7 +303,7 @@ function lab_launcher_enqueue_script()
                 if (cloudProvider === 'azure') {
                     loginLink = `<a href="https://portal.azure.com" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
                 } else if (cloudProvider === 'aws') {
-                    loginLink = `<a href="https://cloudsteak.signin.aws.amazon.com/console" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console</a><br>`;
+                    loginLink = `<a href="https://evolvia.signin.aws.amazon.com/console" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console</a><br>`;
                 }
 
                 resultBox.innerHTML =
