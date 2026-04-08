@@ -17,6 +17,7 @@ function lab_launcher_render_shortcode($atts)
     }
 
     $lab = $labs[$id];
+    $settings = get_option('lab_launcher_settings', []);
     $output = '';
 
     if (is_user_logged_in()) {
@@ -97,8 +98,13 @@ function lab_launcher_render_shortcode($atts)
             };
             </script>';
 
-        $refresh_interval = intval(get_option('lab_launcher_settings')['status_refresh_interval'] ?? 30);
+        $refresh_interval = intval($settings['status_refresh_interval'] ?? 30);
+        $login_links = [
+            'azure' => esc_url_raw($settings['azure_login_url'] ?? ''),
+            'aws' => esc_url_raw($settings['aws_login_url'] ?? ''),
+        ];
         $output .= '<script>window.labLauncherRefreshInterval = ' . $refresh_interval . ';</script>';
+        $output .= '<script>window.labLauncherLoginLinks = ' . wp_json_encode($login_links) . ';</script>';
         $output .= '<table class="table-lab-result">';
                     // Removed duplicate declaration of copyIcon
         $output .= '<td><button id="lab-check-button" class="lab-check-button">Kész vagyok - Ellenőrzés <i class="fa-solid fa-check-double"></i></button></td>';
@@ -183,6 +189,25 @@ function lab_launcher_enqueue_script()
 {
     ?>
     <script>
+        function getLoginLinkHtml(cloudProvider) {
+            const loginLinks = window.labLauncherLoginLinks || {};
+            const loginUrl = loginLinks[cloudProvider];
+
+            if (!loginUrl) {
+                return '';
+            }
+
+            if (cloudProvider === 'azure') {
+                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
+            }
+
+            if (cloudProvider === 'aws') {
+                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
+            }
+
+            return '';
+        }
+
         // 0. Törlés sessionStorage
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -234,11 +259,7 @@ function lab_launcher_enqueue_script()
                         }
 
                         let loginLink = '';
-                        if (cloudProvider === 'azure') {
-                            loginLink = `<a href="https://portal.azure.com" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
-                        } else if (cloudProvider === 'aws') {
-                            loginLink = `<a href="https://cloudsteak.signin.aws.amazon.com/console" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
-                        }
+                        loginLink = getLoginLinkHtml(cloudProvider);
 
                         sessionStorage.setItem(`lab_user_${labId}`, username);
                         sessionStorage.setItem(`lab_pass_${labId}`, password);
@@ -286,12 +307,12 @@ function lab_launcher_enqueue_script()
 
             const username = sessionStorage.getItem(`lab_user_${labId}`);
             const password = sessionStorage.getItem(`lab_pass_${labId}`);
-            const loginLink = sessionStorage.getItem(`lab_uri_${labId}`);
+            const storedLoginLink = sessionStorage.getItem(`lab_uri_${labId}`);
             const cloudProvider = sessionStorage.getItem(`lab_cloud_${labId}`);
             const is_started = sessionStorage.getItem(`lab_is_started_${labId}`);
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
 
-            if (username && password && loginLink && cloudProvider && resultBox) {
+            if (username && password && storedLoginLink && cloudProvider && resultBox) {
                 if (typeof window.copyIcon !== 'function') {
                     window.copyIcon = function (text) {
                         var safeText = (typeof text === 'string') ? text : '';
@@ -299,12 +320,7 @@ function lab_launcher_enqueue_script()
                     };
                 }
 
-                let loginLink = '';
-                if (cloudProvider === 'azure') {
-                    loginLink = `<a href="https://portal.azure.com" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
-                } else if (cloudProvider === 'aws') {
-                    loginLink = `<a href="https://evolvia.signin.aws.amazon.com/console" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console</a><br>`;
-                }
+                const loginLink = getLoginLinkHtml(cloudProvider) || storedLoginLink;
 
                 resultBox.innerHTML =
                     `<table class="table-lab-login"><tr>` +
@@ -592,4 +608,3 @@ function lab_check_enqueue_script()
 
 <?php
 }
-

@@ -26,6 +26,8 @@ function lab_launcher_register_settings()
     add_settings_field('auth0_client_secret', 'Auth0 client Secret', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'auth0_client_secret']);
     add_settings_field('auth0_audience', 'Auth0 Audience', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'auth0_audience']);
     add_settings_field('backend_url', 'Backend URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'backend_url']);
+    add_settings_field('azure_login_url', 'Azure login URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'azure_login_url']);
+    add_settings_field('aws_login_url', 'AWS login URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'aws_login_url']);
     add_settings_field('status_webhook_token', 'Webhook Secret Token', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'status_webhook_token']);
     add_settings_field('status_refresh_interval', 'Státusz frissítés (mp-ben)', 'lab_launcher_number_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'status_refresh_interval']);
 
