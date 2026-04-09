@@ -241,11 +241,55 @@ function lab_launcher_enqueue_script()
             }
         }
 
-        function renderLabCredentials(resultBox, username, password, loginLinkHtml) {
+        function normalizeSafeHttpUrl(rawUrl) {
+            if (typeof rawUrl !== 'string') {
+                return '';
+            }
+
+            const trimmed = rawUrl.trim();
+            if (!trimmed || trimmed.includes('<') || trimmed.includes('>')) {
+                return '';
+            }
+
+            try {
+                const parsed = new URL(trimmed);
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                    return '';
+                }
+                return parsed.toString();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function getLoginLinkUrl(cloudProvider) {
+            const loginLinks = window.labLauncherLoginLinks || {};
+            return normalizeSafeHttpUrl(loginLinks[cloudProvider] || '');
+        }
+
+        function getLoginLinkHtml(cloudProvider, fallbackLoginUrl) {
+            const safeLoginUrl = getLoginLinkUrl(cloudProvider) || normalizeSafeHttpUrl(fallbackLoginUrl || '');
+            if (!safeLoginUrl) {
+                return '';
+            }
+
+            const safeHref = escapeHtml(safeLoginUrl);
+            if (cloudProvider === 'azure') {
+                return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
+            }
+
+            if (cloudProvider === 'aws') {
+                return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
+            }
+
+            return '';
+        }
+
+        function renderLabCredentials(resultBox, username, password, cloudProvider, fallbackLoginUrl) {
             ensureCopyHelpers();
             const safeUsername = escapeHtml(username);
             const safePassword = escapeHtml(password);
-            const safeLoginLink = (typeof loginLinkHtml === 'string') ? loginLinkHtml : '';
+            const safeLoginLink = getLoginLinkHtml(cloudProvider, fallbackLoginUrl);
 
             resultBox.innerHTML =
                 `<table class="table-lab-login"><tr>` +
@@ -326,25 +370,6 @@ function lab_launcher_enqueue_script()
             }
         }
 
-        function getLoginLinkHtml(cloudProvider) {
-            const loginLinks = window.labLauncherLoginLinks || {};
-            const loginUrl = loginLinks[cloudProvider];
-
-            if (!loginUrl) {
-                return '';
-            }
-
-            if (cloudProvider === 'azure') {
-                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
-            }
-
-            if (cloudProvider === 'aws') {
-                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
-            }
-
-            return '';
-        }
-
         // 0. Törlés sessionStorage
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -395,12 +420,11 @@ function lab_launcher_enqueue_script()
                             username += '@evolvia.hu';
                         }
 
-                        let loginLink = '';
-                        loginLink = getLoginLinkHtml(cloudProvider);
+                        const loginUrl = getLoginLinkUrl(cloudProvider);
 
                         sessionStorage.setItem(`lab_user_${labId}`, username);
                         sessionStorage.setItem(`lab_pass_${labId}`, password);
-                        sessionStorage.setItem(`lab_uri_${labId}`, loginLink);
+                        sessionStorage.setItem(`lab_uri_${labId}`, loginUrl);
                         sessionStorage.setItem(`lab_cloud_${labId}`, cloudProvider);
                         sessionStorage.setItem(`lab_is_started_${labId}`, '1');
                         sessionStorage.removeItem(`lab_completed_${labId}`);
@@ -410,7 +434,7 @@ function lab_launcher_enqueue_script()
                         sessionStorage.setItem(`lab_ttl_${labId}`, parseInt(labTTL));
 
 
-                        renderLabCredentials(resultBox, username, password, loginLink);
+                        renderLabCredentials(resultBox, username, password, cloudProvider, loginUrl);
 
 
                     } else {
@@ -435,17 +459,14 @@ function lab_launcher_enqueue_script()
 
             const username = sessionStorage.getItem(`lab_user_${labId}`);
             const password = sessionStorage.getItem(`lab_pass_${labId}`);
-            const storedLoginLink = sessionStorage.getItem(`lab_uri_${labId}`);
+            const storedLoginUrl = sessionStorage.getItem(`lab_uri_${labId}`);
             const cloudProvider = sessionStorage.getItem(`lab_cloud_${labId}`);
             const is_started = sessionStorage.getItem(`lab_is_started_${labId}`);
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
 
-            if (username && password && storedLoginLink && cloudProvider && resultBox) {
+            if (username && password && cloudProvider && resultBox) {
                 ensureCopyHelpers();
-
-                const loginLink = getLoginLinkHtml(cloudProvider) || storedLoginLink;
-
-                renderLabCredentials(resultBox, username, password, loginLink);
+                renderLabCredentials(resultBox, username, password, cloudProvider, storedLoginUrl);
             }
 
             const checkStatus = async () => {
@@ -693,6 +714,8 @@ function lab_check_enqueue_script()
                 const cleanUsername = username?.split('@')[0]; // Extract the part before '@'
                 //const resultBox = checker.querySelector('.lab-check-result') || checker.nextElementSibling;
                 const resultBox = launcherBox.querySelector('.lab-check-result');
+                let verifyicon = '';
+                let verifyclass = '';
 
 
                 console.log('Ellenőrzés indítása:', { labName, cloudProvider, username });
