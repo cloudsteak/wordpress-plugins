@@ -235,6 +235,7 @@ function lab_launcher_enqueue_script()
                             headers: { 'Content-Type': 'application/json' },
                             credentials: 'same-origin',
                             body: JSON.stringify({
+                                lab_id: labId,
                                 lab_name: labName,
                                 cloud_provider: cloudProvider,
                                 lab_ttl: parseInt(labTTL)
