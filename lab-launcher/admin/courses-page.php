@@ -169,7 +169,50 @@ add_action('save_post_lab_training', function ($post_id) {
     }
 });
 
+if (!function_exists('lab_launcher_get_user_lab_status')) {
+    function lab_launcher_get_user_lab_status($user_id, $lab_id)
+    {
+        $user = get_user_by('id', $user_id);
+        if (!$user || empty($user->user_email)) {
+            return 'not_started';
+        }
+
+        $raw_status = function_exists('lab_launcher_get_effective_status')
+            ? lab_launcher_get_effective_status($user->user_email, $lab_id)
+            : 'unknown';
+
+        if ($raw_status === 'completed') {
+            return 'completed';
+        }
+
+        if ($raw_status === 'expired') {
+            return 'expired';
+        }
+
+        if ($raw_status === 'success') {
+            return 'ready';
+        }
+
+        if ($raw_status === 'pending') {
+            return 'in_progress';
+        }
+
+        if ($raw_status === 'error') {
+            return 'error';
+        }
+
+        return 'not_started';
+    }
+}
+
 add_shortcode('lab_training', function ($atts) {
+    static $lab_training_render_depth = 0;
+    if ($lab_training_render_depth > 0) {
+        return '';
+    }
+
+    $lab_training_render_depth++;
+    try {
     $atts = shortcode_atts(['id' => 0], $atts);
     $post = get_post($atts['id']);
     if (!$post || $post->post_type !== 'lab_training')
@@ -177,42 +220,6 @@ add_shortcode('lab_training', function ($atts) {
 
     $assigned = get_post_meta($post->ID, 'assigned_labs', true) ?: [];
     $all_labs = get_option('lab_launcher_labs', []);
-
-    if (!function_exists('get_user_lab_status')) {
-        function get_user_lab_status($user_id, $lab_id)
-        {
-            $user = get_user_by('id', $user_id);
-            if (!$user || empty($user->user_email)) {
-                return 'not_started';
-            }
-
-            $raw_status = function_exists('lab_launcher_get_effective_status')
-                ? lab_launcher_get_effective_status($user->user_email, $lab_id)
-                : 'unknown';
-
-            if ($raw_status === 'completed') {
-                return 'completed';
-            }
-
-            if ($raw_status === 'expired') {
-                return 'expired';
-            }
-
-            if ($raw_status === 'success') {
-                return 'ready';
-            }
-
-            if ($raw_status === 'pending') {
-                return 'in_progress';
-            }
-
-            if ($raw_status === 'error') {
-                return 'error';
-            }
-
-            return 'not_started';
-        }
-    }
 
     ob_start();
     echo "<div class='training-box' style='font-family:sans-serif;'>";
@@ -225,7 +232,7 @@ add_shortcode('lab_training', function ($atts) {
     $completed_labs = 0;
 
     foreach ($visible_lab_ids as $lab_id) {
-        if (get_user_lab_status(get_current_user_id(), $lab_id) === 'completed') {
+        if (lab_launcher_get_user_lab_status(get_current_user_id(), $lab_id) === 'completed') {
             $completed_labs++;
         }
     }
@@ -247,7 +254,7 @@ add_shortcode('lab_training', function ($atts) {
             continue;
         $lab = $all_labs[$lab_id];
 
-        $status = get_user_lab_status(get_current_user_id(), $lab_id);
+        $status = lab_launcher_get_user_lab_status(get_current_user_id(), $lab_id);
         $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '';
         $parsed_url = parse_url($request_uri);
         $ref_path = $parsed_url['path'] ?? '';
@@ -286,6 +293,9 @@ add_shortcode('lab_training', function ($atts) {
 
     echo "</div>";
     return ob_get_clean();
+    } finally {
+        $lab_training_render_depth--;
+    }
 });
 
 function render_shortcode_box($post)
