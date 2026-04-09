@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.1.5  
+**Verzió:** 1.1.6  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -89,14 +89,17 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Felhő labor indítás:** WordPress felületről közvetlenül indíthatók Azure és AWS labor környezetek
 - **Felhasználó alapú kezelés:** Minden felhasználó saját labor példányokat indíthat és kezelhet
 - **REST API integráció:** Teljes REST API támogatás a backend szolgáltatással való kommunikációhoz
-- **Labor státusz követés:** Valós idejű státusz követés a laborok állapotáról (pending, success, error)
+- **Bővített labor státusz követés:** Valós idejű státusz követés a laborok állapotáról, beleértve az „Előkészítés alatt”, „Folyamatban”, „Sikeresen elvégezve” és „Lejárt az idő” állapotokat
 - **Webhook támogatás:** Külső rendszerek értesíthetik a plugint a labor státusz változásokról
 - **Labor ellenőrzés:** Beépített labor verifikációs funkció a teljesítések nyomon követéséhez
 - **Shortcode támogatás:** Egyszerű shortcode-ok használata WordPress oldalakon és bejegyzésekben
 - **Admin felület:** Átfogó adminisztrációs felület kurzusok, laborok és felhasználói státuszok kezeléséhez
+- **Lab kezelő oldal:** A labor admin oldal `Lab kezelő` néven érhető el, külön `Lab létrehozása` gombbal az új űrlap megnyitásához
 - **Részletes státusz szűrés:** A felhasználói státuszok oldalon külön szűrhető az email, a lab azonosító, a cloud provider és a státusz
 - **Csoportosított státusz nézet:** A felhasználói státuszok lista email cím szerint csoportosítva jelenik meg az admin felületen
 - **Lab indulási idő követés:** Az admin oldalon megjeleníthető a lab indulási időpontja az újonnan indított környezetekhez
+- **Képzéskezelés fejlesztések:** A `Képzések` oldalon egyedi `Új képzés` felirat, rendezhető hozzárendelt lab-ok, kurzusleírás megjelenítés és labonkénti státusz a shortcode nézetben
+- **Képzés előrehaladás kijelzés:** A képzés shortcode megjeleníti a kapcsolódó gyakorlatok teljesítési arányát, például `Kapcsolódó gyakorlatok (Elvégezve: 1/9 - 11%)`
 - **TTL kezelés:** Beállítható labor élettartam (Time To Live) a költségek optimalizálásához
 
 #### Fő komponensek
@@ -125,6 +128,5 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 ## Licenc
 
 Mindhárom bővítmény MIT/GPL licenc alatt érhető el.
-
 
 

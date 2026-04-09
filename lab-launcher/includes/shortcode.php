@@ -25,14 +25,20 @@ function lab_launcher_render_shortcode($atts)
         global $lab_launcher_user_email;
         $status_key = $lab_launcher_user_email . '|' . $id;
         $statuses = get_option('lab_launcher_statuses', []);
-        $lab_status = $statuses[$status_key] ?? null;
+        $lab_status = function_exists('lab_launcher_get_effective_status')
+            ? lab_launcher_get_effective_status($lab_launcher_user_email, $id)
+            : ($statuses[$status_key] ?? null);
 
         // Előre generáljuk a státuszt
         $status_text = '';
         if ($lab_status === 'pending') {
-            $status_text = '<span style="background-color:rgba(255, 255, 0, 0.7); color: black; border-radius:5px;padding:5px 30px 5px 30px;">Folyamatban...</span>';
+            $status_text = '<span style="background-color:rgba(255, 255, 0, 0.7); color: black; border-radius:5px;padding:5px 30px 5px 30px;">Előkészítés alatt</span>';
         } elseif ($lab_status === 'success') {
-            $status_text = '<span style="background-color:rgba(0, 0, 255, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Elérhető</span>';
+            $status_text = '<span style="background-color:rgba(0, 0, 255, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Folyamatban</span>';
+        } elseif ($lab_status === 'completed') {
+            $status_text = '<span style="background-color:rgba(46, 125, 50, 0.9); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Sikeresen elvégezve</span>';
+        } elseif ($lab_status === 'expired') {
+            $status_text = '<span style="background-color:rgba(97, 97, 97, 0.9); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Lejárt az idő</span>';
         } elseif ($lab_status === 'error') {
             $status_text = '<span style="background-color:rgba(255, 0, 0, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Hiba történt</span>';
         }
@@ -51,10 +57,10 @@ function lab_launcher_render_shortcode($atts)
                     data-lab-ttl="' . esc_attr($lab['lab_ttl']) . '">';
         $output .= '<table class="table-lab-header">';
         $output .= '<tr>';
-        $output .= '<td><button id="lab-launch-button" class="lab-launch-button before-lab-ready">Kezdés <i class="fa-solid fa-play"></i></button></td>';
+        $output .= '<td><button class="lab-launch-button before-lab-ready">Kezdés <i class="fa-solid fa-play"></i></button></td>';
         $output .= '<td><span class="lab-name">(' . esc_html($lab['lab_name']) . ' - ' . strtoupper($lab['cloud']) . ')</span></td>';
         $output .= '<td><span class="lab-status">' . $status_text . '</span></td>';
-        $output .= '<td><span id="lab-countdown" class="lab-counters"></span></td>';
+        $output .= '<td><span class="lab-countdown lab-counters"></span></td>';
         $output .= '</tr>';
         $output .= '</table>';
 
@@ -107,7 +113,7 @@ function lab_launcher_render_shortcode($atts)
         $output .= '<script>window.labLauncherLoginLinks = ' . wp_json_encode($login_links) . ';</script>';
         $output .= '<table class="table-lab-result">';
                     // Removed duplicate declaration of copyIcon
-        $output .= '<td><button id="lab-check-button" class="lab-check-button">Kész vagyok - Ellenőrzés <i class="fa-solid fa-check-double"></i></button></td>';
+        $output .= '<td><button class="lab-check-button">Kész vagyok - Ellenőrzés <i class="fa-solid fa-check-double"></i></button></td>';
         $output .= '</tr>';
         $output .= '<tr>';
         $output .= '<td><div class="lab-check-result" style="margin-top:10px;"></div></td>';
@@ -189,23 +195,185 @@ function lab_launcher_enqueue_script()
 {
     ?>
     <script>
-        function getLoginLinkHtml(cloudProvider) {
-            const loginLinks = window.labLauncherLoginLinks || {};
-            const loginUrl = loginLinks[cloudProvider];
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
-            if (!loginUrl) {
+        function ensureCopyHelpers() {
+            if (typeof window.copyToClipboardWithFeedback !== 'function') {
+                window.copyToClipboardWithFeedback = function (text, buttonEl) {
+                    const valueToCopy = (typeof text === 'string') ? text : '';
+                    navigator.clipboard.writeText(valueToCopy).then(function () {
+                        const feedback = buttonEl ? buttonEl.parentElement?.querySelector('.copy-feedback') : null;
+                        if (!feedback) {
+                            return;
+                        }
+                        feedback.style.display = 'inline';
+                        window.setTimeout(function () {
+                            feedback.style.display = 'none';
+                        }, 1500);
+                    }).catch(function () {
+                        // No-op: silently ignore copy failures.
+                    });
+                    return false;
+                };
+            }
+
+            if (typeof window.copyIcon !== 'function') {
+                window.copyIcon = function (text) {
+                    var safeText = (typeof text === 'string') ? text : '';
+                    var escapedForJs = safeText
+                        .replace(/\\/g, '\\\\')
+                        .replace(/'/g, "\\'")
+                        .replace(/\r/g, '\\r')
+                        .replace(/\n/g, '\\n')
+                        .replace(/\u2028/g, '\\u2028')
+                        .replace(/\u2029/g, '\\u2029');
+
+                    return (
+                        '<span class="copy-action" style="margin-left:6px;">' +
+                        '<button type="button" onclick="return window.copyToClipboardWithFeedback(\'' + escapedForJs + '\', this)" title="Másolás" style="cursor:pointer;background:none;border:none;color:black;">' +
+                        '<i class="fa-solid fa-copy"></i>' +
+                        '</button>' +
+                        '<span class="copy-feedback" style="display:none;margin-left:4px;color:#2e7d32;font-size:12px;">Másolva!</span>' +
+                        '</span>'
+                    );
+                };
+            }
+        }
+
+        function normalizeSafeHttpUrl(rawUrl) {
+            if (typeof rawUrl !== 'string') {
                 return '';
             }
 
+            const trimmed = rawUrl.trim();
+            if (!trimmed || trimmed.includes('<') || trimmed.includes('>')) {
+                return '';
+            }
+
+            try {
+                const parsed = new URL(trimmed);
+                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                    return '';
+                }
+                return parsed.toString();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function getLoginLinkUrl(cloudProvider) {
+            const loginLinks = window.labLauncherLoginLinks || {};
+            return normalizeSafeHttpUrl(loginLinks[cloudProvider] || '');
+        }
+
+        function getLoginLinkHtml(cloudProvider, fallbackLoginUrl) {
+            const safeLoginUrl = getLoginLinkUrl(cloudProvider) || normalizeSafeHttpUrl(fallbackLoginUrl || '');
+            if (!safeLoginUrl) {
+                return '';
+            }
+
+            const safeHref = escapeHtml(safeLoginUrl);
             if (cloudProvider === 'azure') {
-                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
+                return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">Azure Portál <i class="fa-solid fa-up-right-from-square"></i></a><br>`;
             }
 
             if (cloudProvider === 'aws') {
-                return `<a href="${loginUrl}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
+                return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-up-right-from-square"></i> AWS Console (AWS)</a><br>`;
             }
 
             return '';
+        }
+
+        function renderLabCredentials(resultBox, username, password, cloudProvider, fallbackLoginUrl) {
+            ensureCopyHelpers();
+            const safeUsername = escapeHtml(username);
+            const safePassword = escapeHtml(password);
+            const safeLoginLink = getLoginLinkHtml(cloudProvider, fallbackLoginUrl);
+
+            resultBox.innerHTML =
+                `<table class="table-lab-login"><tr>` +
+                `<td>Felhasználónév: <strong>${safeUsername}</strong> ${window.copyIcon(username)}</td>` +
+                `<td>|</td>` +
+                `<td>Jelszó: <strong>${safePassword}</strong> ${window.copyIcon(password)}</td>` +
+                `<td>|</td>` +
+                `<td>${safeLoginLink}</td>` +
+                `</tr><tr>` +
+                `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
+                `</tr></table>` +
+                `<span class="clean-username" hidden="hidden">${safeUsername}</span>`;
+        }
+
+        function getLabStatusHtml(status) {
+            if (status === 'pending') {
+                return '<span style="background-color:rgba(255, 255, 0, 0.7); color: black; border-radius:5px;padding:5px 30px 5px 30px;">Előkészítés alatt</span>';
+            }
+
+            if (status === 'success') {
+                return '<span style="background-color:rgba(0, 0, 255, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Folyamatban</span>';
+            }
+
+            if (status === 'completed') {
+                return '<span style="background-color:rgba(46, 125, 50, 0.9); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Sikeresen elvégezve</span>';
+            }
+
+            if (status === 'expired') {
+                return '<span style="background-color:rgba(97, 97, 97, 0.9); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Lejárt az idő</span>';
+            }
+
+            if (status === 'error') {
+                return '<span style="background-color:rgba(255, 0, 0, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Hiba történt</span>';
+            }
+
+            return '';
+        }
+
+        function applyLabStatusState(launcher, status) {
+            const labStatusDiv = launcher.querySelector('.lab-status');
+            const launcherBox = launcher.closest('.lab-launcher-box') || launcher.parentElement;
+            const checkButton = launcherBox ? launcherBox.querySelector('.lab-check-button') : null;
+            const countdownElement = launcher.querySelector('.lab-countdown');
+            const beforeReadyElements = (launcherBox || launcher).querySelectorAll('.before-lab-ready');
+            const labId = launcher.dataset.id;
+
+            labStatusDiv.innerHTML = getLabStatusHtml(status);
+
+            if (status === 'success') {
+                sessionStorage.removeItem(`lab_completed_${labId}`);
+                sessionStorage.removeItem(`lab_expired_${labId}`);
+                if (checkButton) {
+                    checkButton.style.display = 'inline';
+                }
+                beforeReadyElements.forEach(el => {
+                    el.style.display = 'none';
+                });
+            } else if (status === 'completed') {
+                sessionStorage.setItem(`lab_completed_${labId}`, '1');
+                if (checkButton) {
+                    checkButton.style.display = 'none';
+                }
+                if (countdownElement) {
+                    countdownElement.innerText = 'A lab sikeresen teljesítve.';
+                }
+            } else if (status === 'expired') {
+                sessionStorage.setItem(`lab_expired_${labId}`, '1');
+                if (checkButton) {
+                    checkButton.style.display = 'none';
+                }
+                if (countdownElement) {
+                    countdownElement.innerText = 'Lejárt az idő.';
+                }
+            } else if (status === 'error') {
+                if (checkButton) {
+                    checkButton.style.display = 'none';
+                }
+            }
         }
 
         // 0. Törlés sessionStorage
@@ -218,13 +386,17 @@ function lab_launcher_enqueue_script()
             document.querySelectorAll('.lab-launch-button').forEach(button => {
                 button.addEventListener('click', async () => {
                     const launcher = button.closest('.lab-launcher');
+                    const launcherBox = launcher.closest('.lab-launcher-box') || launcher.parentElement;
                     const labName = launcher.dataset.lab;
                     const labId = launcher.dataset.id
                     const cloudProvider = launcher.dataset.cloud;
                     const labTTL = launcher.dataset.labTtl;
                     const resultBox = launcher.querySelector('.lab-result') || launcher.nextElementSibling;
 
-                    document.getElementById("lab-check-button").style.display = "none";
+                    const checkButton = launcherBox ? launcherBox.querySelector('.lab-check-button') : null;
+                    if (checkButton) {
+                        checkButton.style.display = "none";
+                    }
 
                     button.disabled = true;
                     launcher.querySelector('.lab-status').textContent = 'Indítás folyamatban...';
@@ -244,45 +416,32 @@ function lab_launcher_enqueue_script()
 
                         const data = await res.json();
 
-                        if (typeof window.copyIcon !== 'function') {
-                            window.copyIcon = function (text) {
-                                var safeText = (typeof text === 'string') ? text : '';
-                                return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
-                            };
-                        }
+                        ensureCopyHelpers();
 
                     if (res.ok) {
-                        document.getElementById('lab-launch-button').innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
+                        button.innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
                         let username = data.username;
                         const password = data.password;
                         if (cloudProvider === 'azure') {
                             username += '@evolvia.hu';
                         }
 
-                        let loginLink = '';
-                        loginLink = getLoginLinkHtml(cloudProvider);
+                        const loginUrl = getLoginLinkUrl(cloudProvider);
 
                         sessionStorage.setItem(`lab_user_${labId}`, username);
                         sessionStorage.setItem(`lab_pass_${labId}`, password);
-                        sessionStorage.setItem(`lab_uri_${labId}`, loginLink);
+                        sessionStorage.setItem(`lab_uri_${labId}`, loginUrl);
                         sessionStorage.setItem(`lab_cloud_${labId}`, cloudProvider);
                         sessionStorage.setItem(`lab_is_started_${labId}`, '1');
+                        sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
+                        sessionStorage.removeItem(`lab_completed_${labId}`);
+                        sessionStorage.removeItem(`lab_expired_${labId}`);
                         startCountdown(labId, 300, "múlva elérhető a gyakorló környezet.", "Már csak néhány pillanat.");
 
                         sessionStorage.setItem(`lab_ttl_${labId}`, parseInt(labTTL));
 
 
-                        resultBox.innerHTML =
-                            `<table class="table-lab-login"><tr>` +
-                            `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
-                            `<td>|</td>` +
-                            `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
-                            `<td>|</td>` +
-                            `<td>${loginLink}</td>` +
-                            `</tr><tr>` +
-                            `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
-                            `</tr></table>` +
-                            `<span id="clean-username" hidden="hidden">${username}</span>`;
+                        renderLabCredentials(resultBox, username, password, cloudProvider, loginUrl);
 
 
                     } else {
@@ -302,38 +461,19 @@ function lab_launcher_enqueue_script()
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.lab-launcher').forEach(launcher => {
             const labId = launcher.dataset.id;
-            const labStatusDiv = launcher.querySelector('.lab-status');
 
             const resultBox = launcher.querySelector('.lab-result');
 
             const username = sessionStorage.getItem(`lab_user_${labId}`);
             const password = sessionStorage.getItem(`lab_pass_${labId}`);
-            const storedLoginLink = sessionStorage.getItem(`lab_uri_${labId}`);
+            const storedLoginUrl = sessionStorage.getItem(`lab_uri_${labId}`);
             const cloudProvider = sessionStorage.getItem(`lab_cloud_${labId}`);
             const is_started = sessionStorage.getItem(`lab_is_started_${labId}`);
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
 
-            if (username && password && storedLoginLink && cloudProvider && resultBox) {
-                if (typeof window.copyIcon !== 'function') {
-                    window.copyIcon = function (text) {
-                        var safeText = (typeof text === 'string') ? text : '';
-                        return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
-                    };
-                }
-
-                const loginLink = getLoginLinkHtml(cloudProvider) || storedLoginLink;
-
-                resultBox.innerHTML =
-                    `<table class="table-lab-login"><tr>` +
-                    `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
-                    `<td>|</td>` +
-                    `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
-                    `<td>|</td>` +
-                    `<td>${loginLink}</td>` +
-                    `</tr><tr>` +
-                    `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
-                    `</tr></table>` +
-                    `<span id="clean-username" hidden="hidden">${username}</span>`;
+            if (username && password && cloudProvider && resultBox) {
+                ensureCopyHelpers();
+                renderLabCredentials(resultBox, username, password, cloudProvider, storedLoginUrl);
             }
 
             const checkStatus = async () => {
@@ -348,29 +488,37 @@ function lab_launcher_enqueue_script()
 
                     const data = await res.json();
                     if (data && data.status) {
-                        let html = '';
-
                         if ((data.status === 'pending') && is_started === '1') {
-                            html = '<span style="background-color:rgba(255, 255, 0, 0.7); color: black; border-radius:5px;padding:5px 30px 5px 30px;">Folyamatban...</span>';
-                            document.getElementById('lab-launch-button').innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
+                            applyLabStatusState(launcher, 'pending');
+                            const launchButton = launcher.querySelector('.lab-launch-button');
+                            if (launchButton) {
+                                launchButton.innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
+                            }
                             startCountdown(labId, 180, "múlva elérhető.", "Már csak néhány pillanat.");
                         } else if (data.status === 'success') {
-                            const labStartTime = sessionStorage.getItem(`lab_start_time_${labId}`);
-                            if (!labStartTime) {
-                                const startTime = new Date().toISOString();
-                                sessionStorage.setItem(`lab_start_time_${labId}`, startTime);
+                            const effectiveStartTs = (data.ready_at_ts && parseInt(data.ready_at_ts, 10) > 0)
+                                ? parseInt(data.ready_at_ts, 10)
+                                : ((data.started_at_ts && parseInt(data.started_at_ts, 10) > 0) ? parseInt(data.started_at_ts, 10) : 0);
+                            if (effectiveStartTs > 0) {
+                                const serverStartTime = new Date(effectiveStartTs * 1000).toISOString();
+                                sessionStorage.setItem(`lab_start_time_${labId}`, serverStartTime);
                             }
-                            const labTTL = sessionStorage.getItem(`lab_ttl_${labId}`);
-                            startLabCountdown(labId, labTTL, " - A lab teljesítésére szánt idő:", "Sajnos lejárt az idő.");
-                            html = '<span style="background-color:rgba(0, 0, 255, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Elérhető</span>';
-                            document.getElementById("lab-check-button").style.display = "inline";
-                            document.querySelectorAll('.before-lab-ready').forEach(el => {
-                                el.style.display = 'none';
-                            });
+                            if (data.lab_ttl && parseInt(data.lab_ttl) > 0) {
+                                sessionStorage.setItem(`lab_ttl_${labId}`, parseInt(data.lab_ttl));
+                            }
+                            const storedLabTTL = sessionStorage.getItem(`lab_ttl_${labId}`);
+                            const labTTL = storedLabTTL !== null ? parseInt(storedLabTTL, 10) : null;
+                            if (labTTL !== null && !Number.isNaN(labTTL) && labTTL > 0) {
+                                startLabCountdown(labId, labTTL, " - A lab teljesítésére szánt idő:", "Sajnos lejárt az idő.");
+                            }
+                            applyLabStatusState(launcher, 'success');
+                        } else if (data.status === 'completed') {
+                            applyLabStatusState(launcher, 'completed');
+                        } else if (data.status === 'expired') {
+                            applyLabStatusState(launcher, 'expired');
                         } else if (data.status === 'error') {
-                            html = '<span style="background-color:rgba(255, 0, 0, 0.7); color: white; border-radius:5px;padding:5px 30px 5px 30px;">Hiba történt</span>';
+                            applyLabStatusState(launcher, 'error');
                         }
-                        labStatusDiv.innerHTML = html;
                     }
                 } catch (e) {
                     console.warn('Státusz lekérdezés sikertelen:', e);
@@ -436,32 +584,44 @@ function lab_launcher_enqueue_script()
 
     // 4. Visszaszámlálás - Várakozás a lab elindulására
     function startCountdown(labId, labDurationSeconds, countdownMessage, timeIsUpMessage, errorMessage = "A visszaszámlálás nem indult el.") {
-        const countdownElement = document.getElementById("lab-countdown");
+        const launcher = document.querySelector(`.lab-launcher[data-id="${labId}"]`);
+        const countdownElement = launcher ? launcher.querySelector('.lab-countdown') : null;
+        if (!countdownElement) {
+            return;
+        }
         // const queryString = window.location.search;
         // const urlParams = new URLSearchParams(queryString);
         // const labId = urlParams.get('id');
         const isStarted = sessionStorage.getItem(`lab_is_started_${labId}`);
         const isLabCountdown = sessionStorage.getItem(`lab_start_countdown_${labId}`);
 
-        if (!isStarted || isLabCountdown === '1') {
+        if (!isStarted) {
+            sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
             countdownElement.innerText = `${errorMessage}`;
             return;
         }
 
+        if (isLabCountdown === '1') {
+            return;
+        }
+
+        sessionStorage.setItem(`lab_start_countdown_${labId}`, '1');
         const startDate = new Date();
         const endDate = new Date(startDate.getTime() + labDurationSeconds * 1000);
 
         const interval = setInterval(() => {
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
             if (startTime) {
+                clearInterval(interval);
+                sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
                 return;
             }
-            sessionStorage.setItem(`lab_start_countdown_${labId}`, '1');
             const now = new Date();
             const remaining = endDate - now;
 
             if (remaining <= 0) {
                 clearInterval(interval);
+                sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
                 countdownElement.innerText = `${timeIsUpMessage}`;
                 return;
             }
@@ -477,7 +637,11 @@ function lab_launcher_enqueue_script()
 
     // 5. Visszaszámlálás - Felhasználó értesítése a rendelkezésre álló időről
     function startLabCountdown(labId, labDurationSeconds, countdownMessage, timeIsUpMessage, errorMessage = "A visszaszámlálás nem indult el.") {
-        const countdownElement = document.getElementById("lab-countdown");
+        const launcher = document.querySelector(`.lab-launcher[data-id="${labId}"]`);
+        const countdownElement = launcher ? launcher.querySelector('.lab-countdown') : null;
+        if (!countdownElement) {
+            return;
+        }
         // const queryString = window.location.search;
         // const urlParams = new URLSearchParams(queryString);
         // const labId = urlParams.get('id');
@@ -495,11 +659,23 @@ function lab_launcher_enqueue_script()
             return;
         }
 
+        const parsedLabDurationSeconds = parseInt(labDurationSeconds, 10);
+
+        if (!labDurationSeconds || Number.isNaN(parsedLabDurationSeconds) || parsedLabDurationSeconds <= 0) {
+            countdownElement.innerText = `${errorMessage}`;
+            return;
+        }
+
 
         const startDate = new Date(startTime);
-        const endDate = new Date(startDate.getTime() + labDurationSeconds * 1000);
+        const endDate = new Date(startDate.getTime() + parsedLabDurationSeconds * 1000);
 
         const interval = setInterval(() => {
+            if (sessionStorage.getItem(`lab_completed_${labId}`) === '1' || sessionStorage.getItem(`lab_expired_${labId}`) === '1') {
+                clearInterval(interval);
+                return;
+            }
+
             sessionStorage.setItem(`lab_lab_countdown_${labId}`, '1');
             const now = new Date();
             const remaining = endDate - now;
@@ -533,20 +709,23 @@ function lab_check_enqueue_script()
     ?>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const countdownText = document.getElementById("lab-countdown").innerText;
-        if (countdownText === "") {
-            // Ellenőrző gomb elrejtése
-            document.getElementById("lab-check-button").style.display = "none";
-        }
         document.querySelectorAll('.lab-check-button').forEach(button => {
+            const launcherBox = button.closest('.lab-launcher-box') || button.closest('.wrap') || document;
+            const launcher = launcherBox.querySelector('.lab-launcher');
+            const countdownElement = launcher ? launcher.querySelector('.lab-countdown') : null;
+            if (countdownElement && countdownElement.innerText === "") {
+                button.style.display = "none";
+            }
             button.addEventListener('click', async () => {
-                const checker = document.querySelectorAll('.lab-checker')[0];
+                const checker = launcherBox.querySelector('.lab-checker');
                 const labName = checker.dataset.lab;
                 const cloudProvider = checker.dataset.cloud;
-                const username = document.getElementById("clean-username")?.textContent;
+                const username = launcherBox.querySelector(".clean-username")?.textContent;
                 const cleanUsername = username?.split('@')[0]; // Extract the part before '@'
                 //const resultBox = checker.querySelector('.lab-check-result') || checker.nextElementSibling;
-                const resultBox = document.querySelectorAll('.lab-check-result')[0];
+                const resultBox = launcherBox.querySelector('.lab-check-result');
+                let verifyicon = '';
+                let verifyclass = '';
 
 
                 console.log('Ellenőrzés indítása:', { labName, cloudProvider, username });
@@ -560,6 +739,7 @@ function lab_check_enqueue_script()
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'same-origin',
                         body: JSON.stringify({
+                            lab_id: checker.closest('.lab-launcher')?.dataset.id || '',
                             lab_name: labName,
                             cloud_provider: cloudProvider,
                             user: cleanUsername
@@ -575,8 +755,11 @@ function lab_check_enqueue_script()
                         } else {
                             verifyicon = "<i class='fa-solid fa-square-check fa-3x'></i>";
                             verifyclass = "success";
+                            if (launcher) {
+                                applyLabStatusState(launcher, 'completed');
+                            }
                             // Ellenőrző gomb elrejtése
-                            document.getElementById("lab-check-button").style.display = "none";
+                            button.style.display = "none";
                         }
                         resultBox.innerHTML =
                             `<span class=${verifyclass}>${verifyicon}</span>` +
@@ -599,7 +782,7 @@ function lab_check_enqueue_script()
                             `<span class=${verifyclass}>${verifyicon}</span>` +
                             `<br><p>Sikeres ellenőrzés!</p>`;
                         // Ellenőrző gomb elrejtése
-                        document.getElementById("lab-check-button").style.display = "none";
+                        button.style.display = "none";
                     }
                 }
             });

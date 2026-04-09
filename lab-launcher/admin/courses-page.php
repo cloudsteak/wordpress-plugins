@@ -4,6 +4,21 @@
 add_action('init', function () {
     register_post_type('lab_training', [
         'label' => 'Képzések',
+        'labels' => [
+            'name' => 'Képzések',
+            'singular_name' => 'Képzés',
+            'add_new' => 'Új képzés',
+            'add_new_item' => 'Új képzés',
+            'edit_item' => 'Képzés szerkesztése',
+            'new_item' => 'Új képzés',
+            'view_item' => 'Képzés megtekintése',
+            'search_items' => 'Képzések keresése',
+            'not_found' => 'Nincs találat.',
+            'not_found_in_trash' => 'Nincs találat a kukában.',
+            'all_items' => 'Képzések',
+            'menu_name' => 'Képzések',
+            'name_admin_bar' => 'Képzés',
+        ],
         'public' => false,
         'show_ui' => true,
         'capability_type' => 'post',
@@ -43,12 +58,107 @@ function render_labs_box($post)
         return;
     }
 
-    echo '<ul>';
+    $ordered_labs = [];
+
+    foreach ($selected as $lab_id) {
+        if (isset($labs[$lab_id])) {
+            $ordered_labs[$lab_id] = $labs[$lab_id];
+        }
+    }
+
     foreach ($labs as $lab_id => $lab_data) {
+        if (!isset($ordered_labs[$lab_id])) {
+            $ordered_labs[$lab_id] = $lab_data;
+        }
+    }
+
+    echo '<style>
+        .lab-training-labs-list {
+            margin: 0;
+        }
+
+        .lab-training-labs-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            padding: 8px 10px;
+            border: 1px solid #dcdcde;
+            border-radius: 6px;
+            background: #fff;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .lab-training-labs-list label {
+            flex: 1;
+        }
+
+        .lab-training-labs-actions {
+            display: inline-flex;
+            gap: 6px;
+        }
+
+        .lab-training-labs-list li.is-active {
+            background: #e7f5ff;
+            border-color: #2271b1;
+        }
+    </style>';
+
+    echo '<p><em>Jelöld ki a lab-okat, majd a Fel és Le gombokkal állítsd be a sorrendet.</em></p>';
+    echo '<ul class="lab-training-labs-list">';
+    foreach ($ordered_labs as $lab_id => $lab_data) {
         $checked = in_array($lab_id, $selected) ? 'checked' : '';
-        echo "<li><label><input type='checkbox' name='assigned_labs[]' value='{$lab_id}' $checked> " . esc_html($lab_id . ' (' . ucfirst($lab_data['cloud']) . ')') . "</label></li>";
+        echo "<li>";
+        echo "<label><input type='checkbox' name='assigned_labs[]' value='" . esc_attr($lab_id) . "' $checked> " . esc_html($lab_id . ' (' . ucfirst($lab_data['cloud']) . ')') . "</label>";
+        echo "<span class='lab-training-labs-actions'>";
+        echo "<button type='button' class='button button-small lab-move-up' aria-label='Mozgatás fel' title='Mozgatás fel'>&uarr;</button>";
+        echo "<button type='button' class='button button-small lab-move-down' aria-label='Mozgatás le' title='Mozgatás le'>&darr;</button>";
+        echo "</span>";
+        echo "</li>";
     }
     echo '</ul>';
+    ?>
+    <script>
+        jQuery(function ($) {
+            const $list = $('.lab-training-labs-list');
+            let highlightTimer = null;
+
+            function highlightItem($item) {
+                $list.find('li').removeClass('is-active');
+                $item.addClass('is-active');
+
+                if (highlightTimer) {
+                    window.clearTimeout(highlightTimer);
+                }
+
+                highlightTimer = window.setTimeout(function () {
+                    $item.removeClass('is-active');
+                }, 3000);
+            }
+
+            $list.on('click', '.lab-move-up', function () {
+                const $item = $(this).closest('li');
+                const $prev = $item.prev('li');
+
+                if ($prev.length) {
+                    $item.insertBefore($prev);
+                    highlightItem($item);
+                }
+            });
+
+            $list.on('click', '.lab-move-down', function () {
+                const $item = $(this).closest('li');
+                const $next = $item.next('li');
+
+                if ($next.length) {
+                    $item.insertAfter($next);
+                    highlightItem($item);
+                }
+            });
+        });
+    </script>
+    <?php
 }
 
 add_action('save_post_lab_training', function ($post_id) {
@@ -59,7 +169,68 @@ add_action('save_post_lab_training', function ($post_id) {
     }
 });
 
+if (!function_exists('lab_launcher_get_user_lab_status_by_email')) {
+    function lab_launcher_get_user_lab_status_by_email($user_email, $lab_id)
+    {
+        $user_email = sanitize_email($user_email);
+        if (!$user_email) {
+            return 'not_started';
+        }
+
+        $raw_status = function_exists('lab_launcher_get_effective_status')
+            ? lab_launcher_get_effective_status($user_email, $lab_id)
+            : 'unknown';
+
+        if ($raw_status === 'completed') {
+            return 'completed';
+        }
+
+        if ($raw_status === 'expired') {
+            return 'expired';
+        }
+
+        if ($raw_status === 'success') {
+            return 'ready';
+        }
+
+        if ($raw_status === 'pending') {
+            return 'in_progress';
+        }
+
+        if ($raw_status === 'error') {
+            return 'error';
+        }
+
+        return 'not_started';
+    }
+}
+
+if (!function_exists('lab_launcher_get_user_lab_status')) {
+    function lab_launcher_get_user_lab_status($user_id, $lab_id, $user_context = null)
+    {
+        $user_email = '';
+
+        if (is_string($user_context) && $user_context !== '') {
+            $user_email = $user_context;
+        } elseif ($user_context instanceof WP_User && !empty($user_context->user_email)) {
+            $user_email = $user_context->user_email;
+        } else {
+            $user = get_user_by('id', $user_id);
+            $user_email = ($user && !empty($user->user_email)) ? $user->user_email : '';
+        }
+
+        return lab_launcher_get_user_lab_status_by_email($user_email, $lab_id);
+    }
+}
+
 add_shortcode('lab_training', function ($atts) {
+    static $lab_training_render_depth = 0;
+    if ($lab_training_render_depth > 0) {
+        return '';
+    }
+
+    $lab_training_render_depth++;
+    try {
     $atts = shortcode_atts(['id' => 0], $atts);
     $post = get_post($atts['id']);
     if (!$post || $post->post_type !== 'lab_training')
@@ -67,35 +238,65 @@ add_shortcode('lab_training', function ($atts) {
 
     $assigned = get_post_meta($post->ID, 'assigned_labs', true) ?: [];
     $all_labs = get_option('lab_launcher_labs', []);
-
-    if (!function_exists('get_user_lab_status')) {
-        function get_user_lab_status($user_id, $lab_id)
-        {
-            // Teszt funkció: mindig "not_started"
-            return 'not_started';
-        }
-    }
+    $current_user = wp_get_current_user();
+    $current_user_email = !empty($current_user->user_email) ? $current_user->user_email : '';
 
     ob_start();
     echo "<div class='training-box' style='font-family:sans-serif;'>";
     echo "<h2 style='font-size: 28px; margin-bottom: 1rem;'>Képzés: " . esc_html($post->post_title) . "</h2>";
+    echo apply_filters('the_content', $post->post_content);
+
+    $visible_lab_ids = array_values(array_filter($assigned, function ($lab_id) use ($all_labs) {
+        return isset($all_labs[$lab_id]);
+    }));
+    $completed_labs = 0;
+
+    foreach ($visible_lab_ids as $lab_id) {
+        if (lab_launcher_get_user_lab_status_by_email($current_user_email, $lab_id) === 'completed') {
+            $completed_labs++;
+        }
+    }
+
+    $completion_rate = count($visible_lab_ids) > 0
+        ? round(($completed_labs / count($visible_lab_ids)) * 100)
+        : 0;
+
+    echo "<div style='margin: 0 0 16px 0; font-size: 18px; font-weight: 600;'>Kapcsolódó gyakorlatok (Elvégezve: "
+        . esc_html($completed_labs)
+        . "/"
+        . esc_html(count($visible_lab_ids))
+        . " - "
+        . esc_html($completion_rate)
+        . "%):</div>";
 
     foreach ($assigned as $lab_id) {
         if (!isset($all_labs[$lab_id]))
             continue;
         $lab = $all_labs[$lab_id];
 
-        $status = get_user_lab_status(get_current_user_id(), $lab_id); // 'ready', 'in_progress', 'not_started'
-        if ($status === 'ready') {
-            $icon = '<i class="fas fa-check-circle" style="color:green;"></i>';
-        } else {
-            $parsed_url = parse_url($_SERVER['REQUEST_URI']);
-            $ref_path = $parsed_url['path'] ?? '';
-            $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
+        $status = lab_launcher_get_user_lab_status_by_email($current_user_email, $lab_id);
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+        $parsed_url = wp_parse_url($request_uri);
+        $ref_path = is_array($parsed_url) ? ($parsed_url['path'] ?? '') : '';
+        $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
 
+        if ($status === 'completed') {
+            $icon = '<i class="fas fa-square-check" style="color:green;"></i>';
+            $status_text = 'Sikeresen elvégezve';
+        } elseif ($status === 'expired') {
+            $icon = '<i class="fas fa-clock" style="color:#616161;"></i>';
+            $status_text = 'Lejárt az idő';
+        } elseif ($status === 'ready') {
+            $icon = '<a href="' . esc_url($launch_url) . '"><i class="fas fa-circle-play" style="color:#0a58ca;"></i></a>';
+            $status_text = 'Folyamatban';
+        } elseif ($status === 'error') {
+            $icon = '<i class="fas fa-triangle-exclamation" style="color:#d63638;"></i>';
+            $status_text = 'Hiba történt';
+        } else {
             $icon_class = ($status === 'in_progress') ? 'fas fa-spinner fa-spin' : 'fas fa-play-circle';
             $icon_color = ($status === 'in_progress') ? 'orange' : 'gray';
-            $icon = '<a href="' . $launch_url . '"><i class="' . $icon_class . '" style="color:' . $icon_color . ';"></i></a>';
+            $icon = '<a href="' . esc_url($launch_url) . '"><i class="' . esc_attr($icon_class) . '" style="color:' . esc_attr($icon_color) . ';"></i></a>';
+            $status_text = ($status === 'in_progress') ? 'Előkészítés alatt' : 'Nem indult';
         }
 
 
@@ -105,12 +306,16 @@ add_shortcode('lab_training', function ($atts) {
         echo "<div style='font-size: 20px; font-weight: bold;'>" . esc_html($lab['lab_title'] ?? $lab_id) . "</div>";
 
         echo "<div style='color: #555;'>" . esc_html($lab['lab_brief'] ?? '') . "</div>";
+        echo "<div style='margin-top:6px;font-weight:600;'>Státusz: " . esc_html($status_text) . "</div>";
 
         echo "</div></div>";
     }
 
     echo "</div>";
     return ob_get_clean();
+    } finally {
+        $lab_training_render_depth--;
+    }
 });
 
 function render_shortcode_box($post)

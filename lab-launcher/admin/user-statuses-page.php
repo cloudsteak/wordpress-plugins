@@ -77,9 +77,9 @@ function lab_launcher_render_user_statuses_page() {
     $q_cloud = isset($_GET['s_cloud']) ? sanitize_text_field($_GET['s_cloud']) : '';
     $q_status = isset($_GET['s_status']) ? sanitize_text_field($_GET['s_status']) : '';
 
-    $statuses = get_option('lab_launcher_statuses', []);
     $status_meta = lab_launcher_get_status_meta();
     $labs = get_option('lab_launcher_labs', []);
+    $statuses = get_option('lab_launcher_statuses', []);
     $rows = [];
     $emails = [];
     $lab_ids = [];
@@ -91,18 +91,21 @@ function lab_launcher_render_user_statuses_page() {
         if (count($parts) !== 2) { continue; }
         list($email, $lab_id) = $parts;
         $cloud = isset($labs[$lab_id]['cloud']) ? sanitize_text_field($labs[$lab_id]['cloud']) : '';
+        $effective_status = function_exists('lab_launcher_get_effective_status')
+            ? lab_launcher_get_effective_status($email, $lab_id, false)
+            : $status;
 
         $emails[$email] = $email;
         $lab_ids[$lab_id] = $lab_id;
         if ($cloud) {
             $clouds[$cloud] = $cloud;
         }
-        $statuses_available[$status] = $status;
+        $statuses_available[$effective_status] = $effective_status;
 
         if ($q_email && $email !== $q_email) { continue; }
         if ($q_lab && $lab_id !== $q_lab) { continue; }
         if ($q_cloud && $cloud !== $q_cloud) { continue; }
-        if ($q_status && $status !== $q_status) { continue; }
+        if ($q_status && $effective_status !== $q_status) { continue; }
 
         $user = get_user_by('email', $email);
         $user_display = $user ? sprintf('%s (#%d)', $user->display_name ?: $user->user_login, $user->ID) : 'Ismeretlen felhasználó';
@@ -121,7 +124,7 @@ function lab_launcher_render_user_statuses_page() {
             'user'   => $user_display,
             'lab_id' => $lab_id,
             'cloud' => $cloud,
-            'status' => $status,
+            'status' => $effective_status,
             'started_at' => $started_at_display,
         ];
     }
@@ -245,8 +248,10 @@ function lab_launcher_render_user_statuses_page() {
                     <?php foreach ($statuses_available as $status_value): ?>
                         <?php
                         $status_label = [
-                            'pending' => 'Folyamatban',
-                            'success' => 'Elérhető',
+                            'pending' => 'Előkészítés alatt',
+                            'success' => 'Folyamatban',
+                            'completed' => 'Sikeresen elvégezve',
+                            'expired' => 'Lejárt az idő',
                             'error' => 'Hiba',
                         ][$status_value] ?? $status_value;
                         ?>
@@ -310,8 +315,10 @@ function lab_launcher_render_user_statuses_page() {
                         <td>
                             <?php
                                 $label = [
-                                    'pending' => 'Folyamatban',
-                                    'success' => 'Elérhető',
+                                    'pending' => 'Előkészítés alatt',
+                                    'success' => 'Folyamatban',
+                                    'completed' => 'Sikeresen elvégezve',
+                                    'expired' => 'Lejárt az idő',
                                     'error'   => 'Hiba',
                                 ][$r['status']] ?? $r['status'];
                                 echo esc_html($label);
