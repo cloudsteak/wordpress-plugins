@@ -186,9 +186,17 @@ add_shortcode('lab_training', function ($atts) {
                 return 'not_started';
             }
 
-            $statuses = get_option('lab_launcher_statuses', []);
-            $status_key = sanitize_email($user->user_email) . '|' . sanitize_text_field($lab_id);
-            $raw_status = $statuses[$status_key] ?? '';
+            $raw_status = function_exists('lab_launcher_get_effective_status')
+                ? lab_launcher_get_effective_status($user->user_email, $lab_id)
+                : 'unknown';
+
+            if ($raw_status === 'completed') {
+                return 'completed';
+            }
+
+            if ($raw_status === 'expired') {
+                return 'expired';
+            }
 
             if ($raw_status === 'success') {
                 return 'ready';
@@ -217,7 +225,7 @@ add_shortcode('lab_training', function ($atts) {
     $completed_labs = 0;
 
     foreach ($visible_lab_ids as $lab_id) {
-        if (get_user_lab_status(get_current_user_id(), $lab_id) === 'ready') {
+        if (get_user_lab_status(get_current_user_id(), $lab_id) === 'completed') {
             $completed_labs++;
         }
     }
@@ -239,22 +247,28 @@ add_shortcode('lab_training', function ($atts) {
             continue;
         $lab = $all_labs[$lab_id];
 
-        $status = get_user_lab_status(get_current_user_id(), $lab_id); // 'ready', 'in_progress', 'not_started'
-        if ($status === 'ready') {
-            $icon = '<i class="fas fa-check-circle" style="color:green;"></i>';
-            $status_text = 'Elérhető';
+        $status = get_user_lab_status(get_current_user_id(), $lab_id);
+        $parsed_url = parse_url($_SERVER['REQUEST_URI']);
+        $ref_path = $parsed_url['path'] ?? '';
+        $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
+
+        if ($status === 'completed') {
+            $icon = '<i class="fas fa-square-check" style="color:green;"></i>';
+            $status_text = 'Sikeresen elvégezve';
+        } elseif ($status === 'expired') {
+            $icon = '<i class="fas fa-clock" style="color:#616161;"></i>';
+            $status_text = 'Lejárt az idő';
+        } elseif ($status === 'ready') {
+            $icon = '<a href="' . esc_url($launch_url) . '"><i class="fas fa-circle-play" style="color:#0a58ca;"></i></a>';
+            $status_text = 'Folyamatban';
         } elseif ($status === 'error') {
             $icon = '<i class="fas fa-triangle-exclamation" style="color:#d63638;"></i>';
             $status_text = 'Hiba történt';
         } else {
-            $parsed_url = parse_url($_SERVER['REQUEST_URI']);
-            $ref_path = $parsed_url['path'] ?? '';
-            $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
-
             $icon_class = ($status === 'in_progress') ? 'fas fa-spinner fa-spin' : 'fas fa-play-circle';
             $icon_color = ($status === 'in_progress') ? 'orange' : 'gray';
-            $icon = '<a href="' . $launch_url . '"><i class="' . $icon_class . '" style="color:' . $icon_color . ';"></i></a>';
-            $status_text = ($status === 'in_progress') ? 'Folyamatban' : 'Nem indult';
+            $icon = '<a href="' . esc_url($launch_url) . '"><i class="' . esc_attr($icon_class) . '" style="color:' . esc_attr($icon_color) . ';"></i></a>';
+            $status_text = ($status === 'in_progress') ? 'Előkészítés alatt' : 'Nem indult';
         }
 
 
