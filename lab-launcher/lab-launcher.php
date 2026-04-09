@@ -136,8 +136,31 @@ function lab_launcher_set_status_started_at($email, $lab_id, $lab_ttl = 5400)
     $meta[$key]['started_at'] = current_time('mysql');
     $meta[$key]['lab_ttl'] = $lab_ttl > 0 ? $lab_ttl : 5400;
     unset($meta[$key]['completed_at']);
+    unset($meta[$key]['ready_at']);
 
     update_option('lab_launcher_status_meta', $meta);
+}
+
+function lab_launcher_mark_lab_ready($email, $lab_id)
+{
+    $email = sanitize_email($email);
+    $lab_id = sanitize_text_field($lab_id);
+
+    if (!$email || !$lab_id) {
+        return;
+    }
+
+    $meta = lab_launcher_get_status_meta();
+    $key = "{$email}|{$lab_id}";
+
+    if (!isset($meta[$key]) || !is_array($meta[$key])) {
+        $meta[$key] = [];
+    }
+
+    if (empty($meta[$key]['ready_at'])) {
+        $meta[$key]['ready_at'] = current_time('mysql');
+        update_option('lab_launcher_status_meta', $meta);
+    }
 }
 
 function lab_launcher_mark_lab_completed($email, $lab_id)
@@ -188,15 +211,16 @@ function lab_launcher_get_effective_status($email, $lab_id, $persist = true)
     }
 
     $started_at = $lab_meta['started_at'] ?? '';
+    $ready_at = $lab_meta['ready_at'] ?? '';
     $lab_ttl = intval($lab_meta['lab_ttl'] ?? 0);
-
-    $started_at_timestamp = $started_at ? intval(mysql2date('U', $started_at, false)) : 0;
+    $expiry_base_at = $ready_at ?: $started_at;
+    $expiry_base_timestamp = $expiry_base_at ? intval(mysql2date('U', $expiry_base_at, false)) : 0;
 
     if (
-        $started_at_timestamp > 0
+        $expiry_base_timestamp > 0
         && $lab_ttl > 0
-        && !in_array($raw_status, ['unknown', 'error'], true)
-        && ($started_at_timestamp + $lab_ttl) <= current_time('timestamp')
+        && $raw_status === 'success'
+        && ($expiry_base_timestamp + $lab_ttl) <= current_time('timestamp')
     ) {
         if ($persist && $raw_status !== 'expired') {
             lab_launcher_set_status_value($email, $lab_id, 'expired');
@@ -225,6 +249,9 @@ function lab_launcher_status_webhook($request)
     }
 
     lab_launcher_set_status_value($email, $lab_id, $status);
+    if ($status === 'success') {
+        lab_launcher_mark_lab_ready($email, $lab_id);
+    }
 
     return new WP_REST_Response(['message' => 'Státusz frissítve'], 200);
 }
@@ -245,6 +272,8 @@ function lab_launcher_status_update($request)
     $meta = lab_launcher_get_status_meta_for_lab($email, $lab_id);
     $started_at = $meta['started_at'] ?? '';
     $started_at_timestamp = $started_at ? intval(mysql2date('U', $started_at, false)) : 0;
+    $ready_at = $meta['ready_at'] ?? '';
+    $ready_at_timestamp = $ready_at ? intval(mysql2date('U', $ready_at, false)) : 0;
     $completed_at = $meta['completed_at'] ?? '';
     $completed_at_timestamp = $completed_at ? intval(mysql2date('U', $completed_at, false)) : 0;
 
@@ -252,6 +281,8 @@ function lab_launcher_status_update($request)
         'status' => $status,
         'started_at' => $started_at,
         'started_at_ts' => $started_at_timestamp,
+        'ready_at' => $ready_at,
+        'ready_at_ts' => $ready_at_timestamp,
         'lab_ttl' => intval($meta['lab_ttl'] ?? 0),
         'completed_at' => $completed_at,
         'completed_at_ts' => $completed_at_timestamp,

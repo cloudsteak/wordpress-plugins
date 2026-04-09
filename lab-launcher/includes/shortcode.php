@@ -195,6 +195,33 @@ function lab_launcher_enqueue_script()
 {
     ?>
     <script>
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderLabCredentials(resultBox, username, password, loginLinkHtml) {
+            const safeUsername = escapeHtml(username);
+            const safePassword = escapeHtml(password);
+            const safeLoginLink = (typeof loginLinkHtml === 'string') ? loginLinkHtml : '';
+
+            resultBox.innerHTML =
+                `<table class="table-lab-login"><tr>` +
+                `<td>Felhasználónév: <strong>${safeUsername}</strong> ${window.copyIcon(username)}</td>` +
+                `<td>|</td>` +
+                `<td>Jelszó: <strong>${safePassword}</strong> ${window.copyIcon(password)}</td>` +
+                `<td>|</td>` +
+                `<td>${safeLoginLink}</td>` +
+                `</tr><tr>` +
+                `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
+                `</tr></table>` +
+                `<span class="clean-username" hidden="hidden">${safeUsername}</span>`;
+        }
+
         function getLabStatusHtml(status) {
             if (status === 'pending') {
                 return '<span style="background-color:rgba(255, 255, 0, 0.7); color: black; border-radius:5px;padding:5px 30px 5px 30px;">Előkészítés alatt</span>';
@@ -350,17 +377,7 @@ function lab_launcher_enqueue_script()
                         sessionStorage.setItem(`lab_ttl_${labId}`, parseInt(labTTL));
 
 
-                        resultBox.innerHTML =
-                            `<table class="table-lab-login"><tr>` +
-                            `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
-                            `<td>|</td>` +
-                            `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
-                            `<td>|</td>` +
-                            `<td>${loginLink}</td>` +
-                            `</tr><tr>` +
-                            `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
-                            `</tr></table>` +
-                            `<span class="clean-username" hidden="hidden">${username}</span>`;
+                        renderLabCredentials(resultBox, username, password, loginLink);
 
 
                     } else {
@@ -400,17 +417,7 @@ function lab_launcher_enqueue_script()
 
                 const loginLink = getLoginLinkHtml(cloudProvider) || storedLoginLink;
 
-                resultBox.innerHTML =
-                    `<table class="table-lab-login"><tr>` +
-                    `<td>Felhasználónév: <strong>${username}</strong> ${window.copyIcon(username)}</td>` +
-                    `<td>|</td>` +
-                    `<td>Jelszó: <strong>${password}</strong> ${window.copyIcon(password)}</td>` +
-                    `<td>|</td>` +
-                    `<td>${loginLink}</td>` +
-                    `</tr><tr>` +
-                    `<td colspan=5><span class="before-lab-ready">Hamarosan értesítést kapsz a gyakorló környezet állapotáról.</span></td>` +
-                    `</tr></table>` +
-                    `<span class="clean-username" hidden="hidden">${username}</span>`;
+                renderLabCredentials(resultBox, username, password, loginLink);
             }
 
             const checkStatus = async () => {
@@ -433,8 +440,11 @@ function lab_launcher_enqueue_script()
                             }
                             startCountdown(labId, 180, "múlva elérhető.", "Már csak néhány pillanat.");
                         } else if (data.status === 'success') {
-                            if (data.started_at_ts && parseInt(data.started_at_ts, 10) > 0) {
-                                const serverStartTime = new Date(parseInt(data.started_at_ts, 10) * 1000).toISOString();
+                            const effectiveStartTs = (data.ready_at_ts && parseInt(data.ready_at_ts, 10) > 0)
+                                ? parseInt(data.ready_at_ts, 10)
+                                : ((data.started_at_ts && parseInt(data.started_at_ts, 10) > 0) ? parseInt(data.started_at_ts, 10) : 0);
+                            if (effectiveStartTs > 0) {
+                                const serverStartTime = new Date(effectiveStartTs * 1000).toISOString();
                                 sessionStorage.setItem(`lab_start_time_${labId}`, serverStartTime);
                             }
                             if (data.lab_ttl && parseInt(data.lab_ttl) > 0) {
