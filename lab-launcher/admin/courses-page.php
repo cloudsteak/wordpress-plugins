@@ -189,6 +189,7 @@ add_shortcode('lab_training', function ($atts) {
     ob_start();
     echo "<div class='training-box' style='font-family:sans-serif;'>";
     echo "<h2 style='font-size: 28px; margin-bottom: 1rem;'>Képzés: " . esc_html($post->post_title) . "</h2>";
+    echo apply_filters('the_content', $post->post_content);
 
     foreach ($assigned as $lab_id) {
         if (!isset($all_labs[$lab_id]))
