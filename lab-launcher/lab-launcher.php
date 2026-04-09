@@ -161,10 +161,11 @@ function lab_launcher_mark_lab_completed($email, $lab_id)
     lab_launcher_set_status_value($email, $lab_id, 'completed');
 }
 
-function lab_launcher_get_effective_status($email, $lab_id)
+function lab_launcher_get_effective_status($email, $lab_id, $persist = true)
 {
     $email = sanitize_email($email);
     $lab_id = sanitize_text_field($lab_id);
+    $persist = (bool) $persist;
 
     if (!$email || !$lab_id) {
         return 'unknown';
@@ -180,7 +181,7 @@ function lab_launcher_get_effective_status($email, $lab_id)
     $lab_meta = isset($meta[$key]) && is_array($meta[$key]) ? $meta[$key] : [];
 
     if (!empty($lab_meta['completed_at'])) {
-        if ($raw_status !== 'completed') {
+        if ($persist && $raw_status !== 'completed') {
             lab_launcher_set_status_value($email, $lab_id, 'completed');
         }
         return 'completed';
@@ -197,7 +198,7 @@ function lab_launcher_get_effective_status($email, $lab_id)
         && !in_array($raw_status, ['unknown', 'error'], true)
         && ($started_at_timestamp + $lab_ttl) <= current_time('timestamp')
     ) {
-        if ($raw_status !== 'expired') {
+        if ($persist && $raw_status !== 'expired') {
             lab_launcher_set_status_value($email, $lab_id, 'expired');
         }
         return 'expired';

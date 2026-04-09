@@ -92,7 +92,7 @@ function lab_launcher_render_user_statuses_page() {
         list($email, $lab_id) = $parts;
         $cloud = isset($labs[$lab_id]['cloud']) ? sanitize_text_field($labs[$lab_id]['cloud']) : '';
         $effective_status = function_exists('lab_launcher_get_effective_status')
-            ? lab_launcher_get_effective_status($email, $lab_id)
+            ? lab_launcher_get_effective_status($email, $lab_id, false)
             : $status;
 
         $emails[$email] = $email;

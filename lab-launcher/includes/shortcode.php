@@ -224,6 +224,7 @@ function lab_launcher_enqueue_script()
             const launcherBox = launcher.closest('.lab-launcher-box') || launcher.parentElement;
             const checkButton = launcherBox ? launcherBox.querySelector('.lab-check-button') : null;
             const countdownElement = launcher.querySelector('.lab-countdown');
+            const beforeReadyElements = (launcherBox || launcher).querySelectorAll('.before-lab-ready');
             const labId = launcher.dataset.id;
 
             labStatusDiv.innerHTML = getLabStatusHtml(status);
@@ -234,7 +235,7 @@ function lab_launcher_enqueue_script()
                 if (checkButton) {
                     checkButton.style.display = 'inline';
                 }
-                document.querySelectorAll('.before-lab-ready').forEach(el => {
+                beforeReadyElements.forEach(el => {
                     el.style.display = 'none';
                 });
             } else if (status === 'completed') {
@@ -537,15 +538,16 @@ function lab_launcher_enqueue_script()
             return;
         }
 
+        sessionStorage.setItem(`lab_start_countdown_${labId}`, '1');
         const startDate = new Date();
         const endDate = new Date(startDate.getTime() + labDurationSeconds * 1000);
 
         const interval = setInterval(() => {
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
             if (startTime) {
+                clearInterval(interval);
                 return;
             }
-            sessionStorage.setItem(`lab_start_countdown_${labId}`, '1');
             const now = new Date();
             const remaining = endDate - now;
 
