@@ -327,11 +327,6 @@ function lab_check_lab_rest($request)
             update_user_meta($user_obj->ID, $meta_key, 'completed');
         }
         lab_launcher_mark_lab_completed($lab_launcher_user_email, $lab_id);
-    } else {
-        $current_status = lab_launcher_get_effective_status($lab_launcher_user_email, $lab_id);
-        if ($current_status === 'success') {
-            lab_launcher_set_status_value($lab_launcher_user_email, $lab_id, 'success');
-        }
     }
 
     return new WP_REST_Response($result, 200);

@@ -432,8 +432,11 @@ function lab_launcher_enqueue_script()
                             if (data.lab_ttl && parseInt(data.lab_ttl) > 0) {
                                 sessionStorage.setItem(`lab_ttl_${labId}`, parseInt(data.lab_ttl));
                             }
-                            const labTTL = parseInt(sessionStorage.getItem(`lab_ttl_${labId}`), 10);
-                            startLabCountdown(labId, labTTL, " - A lab teljesítésére szánt idő:", "Sajnos lejárt az idő.");
+                            const storedLabTTL = sessionStorage.getItem(`lab_ttl_${labId}`);
+                            const labTTL = storedLabTTL !== null ? parseInt(storedLabTTL, 10) : null;
+                            if (labTTL !== null && !Number.isNaN(labTTL) && labTTL > 0) {
+                                startLabCountdown(labId, labTTL, " - A lab teljesítésére szánt idő:", "Sajnos lejárt az idő.");
+                            }
                             applyLabStatusState(launcher, 'success');
                         } else if (data.status === 'completed') {
                             applyLabStatusState(launcher, 'completed');
@@ -574,14 +577,16 @@ function lab_launcher_enqueue_script()
             return;
         }
 
-        if (!labDurationSeconds || Number.isNaN(parseInt(labDurationSeconds, 10)) || parseInt(labDurationSeconds, 10) <= 0) {
+        const parsedLabDurationSeconds = parseInt(labDurationSeconds, 10);
+
+        if (!labDurationSeconds || Number.isNaN(parsedLabDurationSeconds) || parsedLabDurationSeconds <= 0) {
             countdownElement.innerText = `${errorMessage}`;
             return;
         }
 
 
         const startDate = new Date(startTime);
-        const endDate = new Date(startDate.getTime() + parseInt(labDurationSeconds, 10) * 1000);
+        const endDate = new Date(startDate.getTime() + parsedLabDurationSeconds * 1000);
 
         const interval = setInterval(() => {
             if (sessionStorage.getItem(`lab_completed_${labId}`) === '1' || sessionStorage.getItem(`lab_expired_${labId}`) === '1') {

@@ -248,7 +248,8 @@ add_shortcode('lab_training', function ($atts) {
         $lab = $all_labs[$lab_id];
 
         $status = get_user_lab_status(get_current_user_id(), $lab_id);
-        $parsed_url = parse_url($_SERVER['REQUEST_URI']);
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+        $parsed_url = parse_url($request_uri);
         $ref_path = $parsed_url['path'] ?? '';
         $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
 
