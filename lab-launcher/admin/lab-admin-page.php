@@ -32,6 +32,8 @@ function lab_launcher_labs_page()
         return;
     }
 
+    $saved = isset($_GET['saved']) ? sanitize_text_field($_GET['saved']) : '';
+
     // Ha van edit_lab paraméter, betöltjük az adott lab adatait
     $edit_lab_id = isset($_GET['edit_lab']) ? sanitize_text_field($_GET['edit_lab']) : '';
     $existing_lab = null;
@@ -78,16 +80,23 @@ function lab_launcher_labs_page()
         );
 
         update_option('lab_launcher_labs', $labs);
-
-
-
-        echo '<div class="updated"><p>Lab sikeresen elmentve!</p></div>';
+        $existing_lab = $labs[$id];
+        $edit_lab_id = $id;
+        $saved = '1';
     }
 
     // űrlap megjelenítése
     ?>
     <div class="wrap">
-        <h1>Lab létrehozása</h1>
+        <?php if ($saved === '1'): ?>
+            <div class="updated"><p>Lab sikeresen elmentve!</p></div>
+        <?php endif; ?>
+        <div style="display:flex;justify-content:flex-start;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h1>Lab kezelő</h1>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=lab-launcher-labs')); ?>" class="button button-primary">
+                Lab létrehozása
+            </a>
+        </div>
         <form method="post">
             <?php wp_nonce_field('lab_launcher_save_lab'); ?>
             <table class="form-table">
