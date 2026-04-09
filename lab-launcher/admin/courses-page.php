@@ -4,6 +4,21 @@
 add_action('init', function () {
     register_post_type('lab_training', [
         'label' => 'Képzések',
+        'labels' => [
+            'name' => 'Képzések',
+            'singular_name' => 'Képzés',
+            'add_new' => 'Új képzés',
+            'add_new_item' => 'Új képzés',
+            'edit_item' => 'Képzés szerkesztése',
+            'new_item' => 'Új képzés',
+            'view_item' => 'Képzés megtekintése',
+            'search_items' => 'Képzések keresése',
+            'not_found' => 'Nincs találat.',
+            'not_found_in_trash' => 'Nincs találat a kukában.',
+            'all_items' => 'Képzések',
+            'menu_name' => 'Képzések',
+            'name_admin_bar' => 'Képzés',
+        ],
         'public' => false,
         'show_ui' => true,
         'capability_type' => 'post',
@@ -43,12 +58,107 @@ function render_labs_box($post)
         return;
     }
 
-    echo '<ul>';
+    $ordered_labs = [];
+
+    foreach ($selected as $lab_id) {
+        if (isset($labs[$lab_id])) {
+            $ordered_labs[$lab_id] = $labs[$lab_id];
+        }
+    }
+
     foreach ($labs as $lab_id => $lab_data) {
+        if (!isset($ordered_labs[$lab_id])) {
+            $ordered_labs[$lab_id] = $lab_data;
+        }
+    }
+
+    echo '<style>
+        .lab-training-labs-list {
+            margin: 0;
+        }
+
+        .lab-training-labs-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            padding: 8px 10px;
+            border: 1px solid #dcdcde;
+            border-radius: 6px;
+            background: #fff;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .lab-training-labs-list label {
+            flex: 1;
+        }
+
+        .lab-training-labs-actions {
+            display: inline-flex;
+            gap: 6px;
+        }
+
+        .lab-training-labs-list li.is-active {
+            background: #e7f5ff;
+            border-color: #2271b1;
+        }
+    </style>';
+
+    echo '<p><em>Jelöld ki a lab-okat, majd a Fel és Le gombokkal állítsd be a sorrendet.</em></p>';
+    echo '<ul class="lab-training-labs-list">';
+    foreach ($ordered_labs as $lab_id => $lab_data) {
         $checked = in_array($lab_id, $selected) ? 'checked' : '';
-        echo "<li><label><input type='checkbox' name='assigned_labs[]' value='{$lab_id}' $checked> " . esc_html($lab_id . ' (' . ucfirst($lab_data['cloud']) . ')') . "</label></li>";
+        echo "<li>";
+        echo "<label><input type='checkbox' name='assigned_labs[]' value='" . esc_attr($lab_id) . "' $checked> " . esc_html($lab_id . ' (' . ucfirst($lab_data['cloud']) . ')') . "</label>";
+        echo "<span class='lab-training-labs-actions'>";
+        echo "<button type='button' class='button button-small lab-move-up' aria-label='Mozgatás fel' title='Mozgatás fel'>&uarr;</button>";
+        echo "<button type='button' class='button button-small lab-move-down' aria-label='Mozgatás le' title='Mozgatás le'>&darr;</button>";
+        echo "</span>";
+        echo "</li>";
     }
     echo '</ul>';
+    ?>
+    <script>
+        jQuery(function ($) {
+            const $list = $('.lab-training-labs-list');
+            let highlightTimer = null;
+
+            function highlightItem($item) {
+                $list.find('li').removeClass('is-active');
+                $item.addClass('is-active');
+
+                if (highlightTimer) {
+                    window.clearTimeout(highlightTimer);
+                }
+
+                highlightTimer = window.setTimeout(function () {
+                    $item.removeClass('is-active');
+                }, 3000);
+            }
+
+            $list.on('click', '.lab-move-up', function () {
+                const $item = $(this).closest('li');
+                const $prev = $item.prev('li');
+
+                if ($prev.length) {
+                    $item.insertBefore($prev);
+                    highlightItem($item);
+                }
+            });
+
+            $list.on('click', '.lab-move-down', function () {
+                const $item = $(this).closest('li');
+                const $next = $item.next('li');
+
+                if ($next.length) {
+                    $item.insertAfter($next);
+                    highlightItem($item);
+                }
+            });
+        });
+    </script>
+    <?php
 }
 
 add_action('save_post_lab_training', function ($post_id) {
