@@ -169,16 +169,16 @@ add_action('save_post_lab_training', function ($post_id) {
     }
 });
 
-if (!function_exists('lab_launcher_get_user_lab_status')) {
-    function lab_launcher_get_user_lab_status($user_id, $lab_id)
+if (!function_exists('lab_launcher_get_user_lab_status_by_email')) {
+    function lab_launcher_get_user_lab_status_by_email($user_email, $lab_id)
     {
-        $user = get_user_by('id', $user_id);
-        if (!$user || empty($user->user_email)) {
+        $user_email = sanitize_email($user_email);
+        if (!$user_email) {
             return 'not_started';
         }
 
         $raw_status = function_exists('lab_launcher_get_effective_status')
-            ? lab_launcher_get_effective_status($user->user_email, $lab_id)
+            ? lab_launcher_get_effective_status($user_email, $lab_id)
             : 'unknown';
 
         if ($raw_status === 'completed') {
@@ -205,6 +205,24 @@ if (!function_exists('lab_launcher_get_user_lab_status')) {
     }
 }
 
+if (!function_exists('lab_launcher_get_user_lab_status')) {
+    function lab_launcher_get_user_lab_status($user_id, $lab_id, $user_context = null)
+    {
+        $user_email = '';
+
+        if (is_string($user_context) && $user_context !== '') {
+            $user_email = $user_context;
+        } elseif ($user_context instanceof WP_User && !empty($user_context->user_email)) {
+            $user_email = $user_context->user_email;
+        } else {
+            $user = get_user_by('id', $user_id);
+            $user_email = ($user && !empty($user->user_email)) ? $user->user_email : '';
+        }
+
+        return lab_launcher_get_user_lab_status_by_email($user_email, $lab_id);
+    }
+}
+
 add_shortcode('lab_training', function ($atts) {
     static $lab_training_render_depth = 0;
     if ($lab_training_render_depth > 0) {
@@ -220,6 +238,8 @@ add_shortcode('lab_training', function ($atts) {
 
     $assigned = get_post_meta($post->ID, 'assigned_labs', true) ?: [];
     $all_labs = get_option('lab_launcher_labs', []);
+    $current_user = wp_get_current_user();
+    $current_user_email = !empty($current_user->user_email) ? $current_user->user_email : '';
 
     ob_start();
     echo "<div class='training-box' style='font-family:sans-serif;'>";
@@ -232,7 +252,7 @@ add_shortcode('lab_training', function ($atts) {
     $completed_labs = 0;
 
     foreach ($visible_lab_ids as $lab_id) {
-        if (lab_launcher_get_user_lab_status(get_current_user_id(), $lab_id) === 'completed') {
+        if (lab_launcher_get_user_lab_status_by_email($current_user_email, $lab_id) === 'completed') {
             $completed_labs++;
         }
     }
@@ -254,10 +274,10 @@ add_shortcode('lab_training', function ($atts) {
             continue;
         $lab = $all_labs[$lab_id];
 
-        $status = lab_launcher_get_user_lab_status(get_current_user_id(), $lab_id);
+        $status = lab_launcher_get_user_lab_status_by_email($current_user_email, $lab_id);
         $request_uri = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '';
-        $parsed_url = parse_url($request_uri);
-        $ref_path = $parsed_url['path'] ?? '';
+        $parsed_url = wp_parse_url($request_uri);
+        $ref_path = is_array($parsed_url) ? ($parsed_url['path'] ?? '') : '';
         $launch_url = home_url('/labs') . '?id=' . urlencode($lab_id) . '&ref=' . urlencode($ref_path);
 
         if ($status === 'completed') {
