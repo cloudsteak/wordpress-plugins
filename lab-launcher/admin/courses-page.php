@@ -181,7 +181,27 @@ add_shortcode('lab_training', function ($atts) {
     if (!function_exists('get_user_lab_status')) {
         function get_user_lab_status($user_id, $lab_id)
         {
-            // Teszt funkció: mindig "not_started"
+            $user = get_user_by('id', $user_id);
+            if (!$user || empty($user->user_email)) {
+                return 'not_started';
+            }
+
+            $statuses = get_option('lab_launcher_statuses', []);
+            $status_key = sanitize_email($user->user_email) . '|' . sanitize_text_field($lab_id);
+            $raw_status = $statuses[$status_key] ?? '';
+
+            if ($raw_status === 'success') {
+                return 'ready';
+            }
+
+            if ($raw_status === 'pending') {
+                return 'in_progress';
+            }
+
+            if ($raw_status === 'error') {
+                return 'error';
+            }
+
             return 'not_started';
         }
     }
@@ -191,6 +211,29 @@ add_shortcode('lab_training', function ($atts) {
     echo "<h2 style='font-size: 28px; margin-bottom: 1rem;'>Képzés: " . esc_html($post->post_title) . "</h2>";
     echo apply_filters('the_content', $post->post_content);
 
+    $visible_lab_ids = array_values(array_filter($assigned, function ($lab_id) use ($all_labs) {
+        return isset($all_labs[$lab_id]);
+    }));
+    $completed_labs = 0;
+
+    foreach ($visible_lab_ids as $lab_id) {
+        if (get_user_lab_status(get_current_user_id(), $lab_id) === 'ready') {
+            $completed_labs++;
+        }
+    }
+
+    $completion_rate = count($visible_lab_ids) > 0
+        ? round(($completed_labs / count($visible_lab_ids)) * 100)
+        : 0;
+
+    echo "<div style='margin: 0 0 16px 0; font-size: 18px; font-weight: 600;'>Kapcsolódó gyakorlatok (Elvégezve: "
+        . esc_html($completed_labs)
+        . "/"
+        . esc_html(count($visible_lab_ids))
+        . " - "
+        . esc_html($completion_rate)
+        . "%):</div>";
+
     foreach ($assigned as $lab_id) {
         if (!isset($all_labs[$lab_id]))
             continue;
@@ -199,6 +242,10 @@ add_shortcode('lab_training', function ($atts) {
         $status = get_user_lab_status(get_current_user_id(), $lab_id); // 'ready', 'in_progress', 'not_started'
         if ($status === 'ready') {
             $icon = '<i class="fas fa-check-circle" style="color:green;"></i>';
+            $status_text = 'Elérhető';
+        } elseif ($status === 'error') {
+            $icon = '<i class="fas fa-triangle-exclamation" style="color:#d63638;"></i>';
+            $status_text = 'Hiba történt';
         } else {
             $parsed_url = parse_url($_SERVER['REQUEST_URI']);
             $ref_path = $parsed_url['path'] ?? '';
@@ -207,6 +254,7 @@ add_shortcode('lab_training', function ($atts) {
             $icon_class = ($status === 'in_progress') ? 'fas fa-spinner fa-spin' : 'fas fa-play-circle';
             $icon_color = ($status === 'in_progress') ? 'orange' : 'gray';
             $icon = '<a href="' . $launch_url . '"><i class="' . $icon_class . '" style="color:' . $icon_color . ';"></i></a>';
+            $status_text = ($status === 'in_progress') ? 'Folyamatban' : 'Nem indult';
         }
 
 
@@ -216,6 +264,7 @@ add_shortcode('lab_training', function ($atts) {
         echo "<div style='font-size: 20px; font-weight: bold;'>" . esc_html($lab['lab_title'] ?? $lab_id) . "</div>";
 
         echo "<div style='color: #555;'>" . esc_html($lab['lab_brief'] ?? '') . "</div>";
+        echo "<div style='margin-top:6px;font-weight:600;'>Státusz: " . esc_html($status_text) . "</div>";
 
         echo "</div></div>";
     }
