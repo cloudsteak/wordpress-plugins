@@ -133,10 +133,7 @@ function lab_launcher_set_status_started_at($email, $lab_id, $lab_ttl = 5400)
         $meta[$key] = [];
     }
 
-    if (empty($meta[$key]['started_at'])) {
-        $meta[$key]['started_at'] = current_time('mysql');
-    }
-
+    $meta[$key]['started_at'] = current_time('mysql');
     $meta[$key]['lab_ttl'] = $lab_ttl > 0 ? $lab_ttl : 5400;
     unset($meta[$key]['completed_at']);
 
@@ -192,11 +189,13 @@ function lab_launcher_get_effective_status($email, $lab_id)
     $started_at = $lab_meta['started_at'] ?? '';
     $lab_ttl = intval($lab_meta['lab_ttl'] ?? 0);
 
+    $started_at_timestamp = $started_at ? intval(mysql2date('U', $started_at, false)) : 0;
+
     if (
-        $started_at
+        $started_at_timestamp > 0
         && $lab_ttl > 0
         && !in_array($raw_status, ['unknown', 'error'], true)
-        && (strtotime($started_at) + $lab_ttl) <= current_time('timestamp')
+        && ($started_at_timestamp + $lab_ttl) <= current_time('timestamp')
     ) {
         if ($raw_status !== 'expired') {
             lab_launcher_set_status_value($email, $lab_id, 'expired');
@@ -243,12 +242,18 @@ function lab_launcher_status_update($request)
 
     $status = lab_launcher_get_effective_status($email, $lab_id);
     $meta = lab_launcher_get_status_meta_for_lab($email, $lab_id);
+    $started_at = $meta['started_at'] ?? '';
+    $started_at_timestamp = $started_at ? intval(mysql2date('U', $started_at, false)) : 0;
+    $completed_at = $meta['completed_at'] ?? '';
+    $completed_at_timestamp = $completed_at ? intval(mysql2date('U', $completed_at, false)) : 0;
 
     return new WP_REST_Response([
         'status' => $status,
-        'started_at' => $meta['started_at'] ?? '',
+        'started_at' => $started_at,
+        'started_at_ts' => $started_at_timestamp,
         'lab_ttl' => intval($meta['lab_ttl'] ?? 0),
-        'completed_at' => $meta['completed_at'] ?? '',
+        'completed_at' => $completed_at,
+        'completed_at_ts' => $completed_at_timestamp,
     ], 200);
 }
 
