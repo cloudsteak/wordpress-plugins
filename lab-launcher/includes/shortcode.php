@@ -204,7 +204,45 @@ function lab_launcher_enqueue_script()
                 .replace(/'/g, '&#39;');
         }
 
+        function ensureCopyHelpers() {
+            if (typeof window.copyToClipboardWithFeedback !== 'function') {
+                window.copyToClipboardWithFeedback = function (text, buttonEl) {
+                    const valueToCopy = (typeof text === 'string') ? text : '';
+                    navigator.clipboard.writeText(valueToCopy).then(function () {
+                        const feedback = buttonEl ? buttonEl.parentElement?.querySelector('.copy-feedback') : null;
+                        if (!feedback) {
+                            return;
+                        }
+                        feedback.style.display = 'inline';
+                        window.setTimeout(function () {
+                            feedback.style.display = 'none';
+                        }, 1500);
+                    }).catch(function () {
+                        // No-op: silently ignore copy failures.
+                    });
+                    return false;
+                };
+            }
+
+            if (typeof window.copyIcon !== 'function') {
+                window.copyIcon = function (text) {
+                    var safeText = (typeof text === 'string') ? text : '';
+                    var escapedForJs = safeText.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+                    return (
+                        '<span class="copy-action" style="margin-left:6px;">' +
+                        '<button type="button" onclick="return window.copyToClipboardWithFeedback(\'' + escapedForJs + '\', this)" title="Másolás" style="cursor:pointer;background:none;border:none;color:black;">' +
+                        '<i class="fa-solid fa-copy"></i>' +
+                        '</button>' +
+                        '<span class="copy-feedback" style="display:none;margin-left:4px;color:#2e7d32;font-size:12px;">Másolva!</span>' +
+                        '</span>'
+                    );
+                };
+            }
+        }
+
         function renderLabCredentials(resultBox, username, password, loginLinkHtml) {
+            ensureCopyHelpers();
             const safeUsername = escapeHtml(username);
             const safePassword = escapeHtml(password);
             const safeLoginLink = (typeof loginLinkHtml === 'string') ? loginLinkHtml : '';
@@ -347,12 +385,7 @@ function lab_launcher_enqueue_script()
 
                         const data = await res.json();
 
-                        if (typeof window.copyIcon !== 'function') {
-                            window.copyIcon = function (text) {
-                                var safeText = (typeof text === 'string') ? text : '';
-                                return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
-                            };
-                        }
+                        ensureCopyHelpers();
 
                     if (res.ok) {
                         button.innerHTML = 'Folyamatban <i class="fa-solid fa-hourglass-start"></i>';
@@ -408,12 +441,7 @@ function lab_launcher_enqueue_script()
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
 
             if (username && password && storedLoginLink && cloudProvider && resultBox) {
-                if (typeof window.copyIcon !== 'function') {
-                    window.copyIcon = function (text) {
-                        var safeText = (typeof text === 'string') ? text : '';
-                        return '<button onclick="navigator.clipboard.writeText(\'' + safeText.replace(/'/g, "\\'") + '\')" title="Másolás" style="margin-left:6px;cursor:pointer;background:none;border:none;color:black;"><i class="fa-solid fa-copy"></i></button>';
-                    };
-                }
+                ensureCopyHelpers();
 
                 const loginLink = getLoginLinkHtml(cloudProvider) || storedLoginLink;
 
