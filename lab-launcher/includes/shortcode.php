@@ -227,7 +227,13 @@ function lab_launcher_enqueue_script()
             if (typeof window.copyIcon !== 'function') {
                 window.copyIcon = function (text) {
                     var safeText = (typeof text === 'string') ? text : '';
-                    var escapedForJs = safeText.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    var escapedForJs = safeText
+                        .replace(/\\/g, '\\\\')
+                        .replace(/'/g, "\\'")
+                        .replace(/\r/g, '\\r')
+                        .replace(/\n/g, '\\n')
+                        .replace(/\u2028/g, '\\u2028')
+                        .replace(/\u2029/g, '\\u2029');
 
                     return (
                         '<span class="copy-action" style="margin-left:6px;">' +
@@ -427,6 +433,7 @@ function lab_launcher_enqueue_script()
                         sessionStorage.setItem(`lab_uri_${labId}`, loginUrl);
                         sessionStorage.setItem(`lab_cloud_${labId}`, cloudProvider);
                         sessionStorage.setItem(`lab_is_started_${labId}`, '1');
+                        sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
                         sessionStorage.removeItem(`lab_completed_${labId}`);
                         sessionStorage.removeItem(`lab_expired_${labId}`);
                         startCountdown(labId, 300, "múlva elérhető a gyakorló környezet.", "Már csak néhány pillanat.");
@@ -589,6 +596,7 @@ function lab_launcher_enqueue_script()
         const isLabCountdown = sessionStorage.getItem(`lab_start_countdown_${labId}`);
 
         if (!isStarted) {
+            sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
             countdownElement.innerText = `${errorMessage}`;
             return;
         }
@@ -605,6 +613,7 @@ function lab_launcher_enqueue_script()
             const startTime = sessionStorage.getItem(`lab_start_time_${labId}`);
             if (startTime) {
                 clearInterval(interval);
+                sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
                 return;
             }
             const now = new Date();
@@ -612,6 +621,7 @@ function lab_launcher_enqueue_script()
 
             if (remaining <= 0) {
                 clearInterval(interval);
+                sessionStorage.setItem(`lab_start_countdown_${labId}`, '0');
                 countdownElement.innerText = `${timeIsUpMessage}`;
                 return;
             }
