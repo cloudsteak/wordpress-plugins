@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.1.1  
+**Verzió:** 1.1.5  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -94,6 +94,9 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Labor ellenőrzés:** Beépített labor verifikációs funkció a teljesítések nyomon követéséhez
 - **Shortcode támogatás:** Egyszerű shortcode-ok használata WordPress oldalakon és bejegyzésekben
 - **Admin felület:** Átfogó adminisztrációs felület kurzusok, laborok és felhasználói státuszok kezeléséhez
+- **Részletes státusz szűrés:** A felhasználói státuszok oldalon külön szűrhető az email, a lab azonosító, a cloud provider és a státusz
+- **Csoportosított státusz nézet:** A felhasználói státuszok lista email cím szerint csoportosítva jelenik meg az admin felületen
+- **Lab indulási idő követés:** Az admin oldalon megjeleníthető a lab indulási időpontja az újonnan indított környezetekhez
 - **TTL kezelés:** Beállítható labor élettartam (Time To Live) a költségek optimalizálásához
 
 #### Fő komponensek
@@ -122,7 +125,6 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 ## Licenc
 
 Mindhárom bővítmény MIT/GPL licenc alatt érhető el.
-
 
 
 

@@ -3,7 +3,7 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.1.4
+ * Version: 1.1.5
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
@@ -64,6 +64,35 @@ add_action('rest_api_init', function () {
         'permission_callback' => '__return_true'
     ]);
 });
+
+function lab_launcher_get_status_meta()
+{
+    $meta = get_option('lab_launcher_status_meta', []);
+
+    return is_array($meta) ? $meta : [];
+}
+
+function lab_launcher_set_status_started_at($email, $lab_id)
+{
+    $email = sanitize_email($email);
+    $lab_id = sanitize_text_field($lab_id);
+
+    if (!$email || !$lab_id) {
+        return;
+    }
+
+    $meta = lab_launcher_get_status_meta();
+    $key = "{$email}|{$lab_id}";
+
+    if (!isset($meta[$key]) || !is_array($meta[$key])) {
+        $meta[$key] = [];
+    }
+
+    if (empty($meta[$key]['started_at'])) {
+        $meta[$key]['started_at'] = current_time('mysql');
+        update_option('lab_launcher_status_meta', $meta);
+    }
+}
 
 function lab_launcher_status_webhook($request)
 {
@@ -136,6 +165,9 @@ function lab_launcher_start_lab_rest($request)
             'message' => $result->get_error_message()
         ], $result->get_error_data()['status'] ?? 500);
     }
+
+    $lab_id = sanitize_text_field($data['lab_id'] ?? $data['lab_name']);
+    lab_launcher_set_status_started_at($lab_launcher_user_email, $lab_id);
 
     return new WP_REST_Response($result, 200);
 }
