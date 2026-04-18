@@ -553,13 +553,32 @@ function lab_launcher_enqueue_script()
                 prevBtn.disabled = currentPage === 0;
                 nextBtn.disabled = currentPage >= pages.length - 1;
 
-                // Görgetés a tartalom tetejére
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-                const labId = urlParams.get('id');
-                const is_started = sessionStorage.getItem(`lab_is_started_${labId}`);
-                if (is_started === '1') {
-                    desc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const currentPageElement = pages[currentPage] || null;
+                if (currentPageElement) {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            if (currentPage === 0) {
+                                const launcherBox = desc.closest('.lab-launcher-box');
+                                const labContainer = launcherBox ? launcherBox.parentElement : null;
+                                const headerTitle = labContainer
+                                    ? labContainer.querySelector('.lab-header')
+                                    : document.querySelector('.lab-header');
+                                if (headerTitle) {
+                                    const offset = 110;
+                                    const targetY = headerTitle.getBoundingClientRect().top + window.pageYOffset - offset;
+                                    window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
+                                }
+                                return;
+                            }
+
+                            const targetHeading = currentPageElement.querySelector('h3');
+                            if (targetHeading) {
+                                const offset = 110;
+                                const targetY = targetHeading.getBoundingClientRect().top + window.pageYOffset - offset;
+                                window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
+                            }
+                        });
+                    });
                 }
             };
 
