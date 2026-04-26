@@ -1,48 +1,41 @@
 # Cloud Glossary
 
-Cloud Glossary is a WordPress plugin for managing cloud service entries (AWS, Azure, GCP, generic) with a dedicated custom post type, taxonomies, and admin productivity tools.
+Cloud Glossary is a WordPress plugin for managing **cloud concepts** and their AWS/Azure/GCP mappings.
 
-Current status: **Phase 1-4 implemented**.
+Current status: concept-first data model + admin + REST + frontend shortcode are implemented.
 
 ## What Is Implemented
 
-- Custom post type: `cloud_service`
-- Taxonomies: `cloud_provider`, `cloud_category`
-- Activation seed terms (providers + default categories)
-- Meta box on `cloud_service` edit screen:
-  - `_cg_short_description`
-  - `_cg_official_docs_url`
-  - `_cg_equivalents`
-  - `_cg_related_posts`
-  - `_cg_order`
-- Meta registration in REST via `register_post_meta`
-- Admin list improvements:
-  - custom columns
-  - sortable columns
-  - provider/category filters
-  - duplicate row action
-- Admin autocomplete AJAX endpoints:
-  - `cg_search_services`
-  - `cg_search_posts`
-- Custom REST namespace:
+- Custom post type: `cloud_service` (one record = one generic concept)
+- Taxonomy: `cloud_category`
+- Meta box with provider blocks: AWS / Azure / GCP
+- Central order field: `_cg_order`
+- Provider fields per block:
+  - `name`
+  - `short_description`
+  - `official_docs_url`
+  - `related_posts`
+- REST API:
   - `GET /wp-json/cloud-glossary/v1/services`
   - `GET /wp-json/cloud-glossary/v1/services/{id}`
-  - transient cache key: `cg_services_cache` (1 hour)
+- Frontend shortcode: `[cloud_glossary]`
 
 ## Installation
 
 1. Copy `cloud-glossary/` into `wp-content/plugins/`.
 2. Activate **Cloud Glossary** in WP Admin > Plugins.
-3. On activation, rewrite rules are flushed and default terms are created.
+3. On activation, rewrite rules are flushed and default category terms are created.
 
 ## Quick Usage
 
 1. Open **Cloud Szolgáltatások** in admin.
-2. Create a new `cloud_service` item.
-3. Assign one provider and one category.
-4. Fill in Service Details meta box.
+2. Create a new concept entry:
+  - title = generic concept name
+  - content = generic concept description
+3. Select a category.
+4. Fill AWS / Azure / GCP blocks in **Szolgáltatás részletei (szolgáltatónként)**.
 5. Save/publish.
-6. Use list filters/sorting to manage entries at scale.
+6. Insert `[cloud_glossary]` into a page/post.
 
 ## Data Model
 
@@ -50,27 +43,25 @@ Current status: **Phase 1-4 implemented**.
 
 - `cloud_service`
 
-### Taxonomies
+### Taxonomy
 
-- `cloud_provider`: `aws`, `azure`, `gcp`, `generic`
-- `cloud_category`: `halozat`, `biztonsag`, `terheleselosztas`, `compute`, `adat`, `egyeb`
+- `cloud_category`
 
 ### Meta Keys
 
-- `_cg_short_description` (string)
-- `_cg_official_docs_url` (string)
-- `_cg_equivalents` (array of `cloud_service` IDs)
-- `_cg_related_posts` (array of `{ post_id, custom_title }`)
-- `_cg_order` (integer)
-
-## REST Notes
-
-Because `cloud_service` uses `show_in_rest = true` and `rest_base = cloud-services`:
-
-- `GET /wp-json/wp/v2/cloud-services`
-- `GET /wp-json/wp/v2/cloud-services/{id}`
-
-Meta appears under `meta` for users with proper capability.
+- `_cg_order`
+- `_cg_aws_name`
+- `_cg_aws_short_description`
+- `_cg_aws_official_docs_url`
+- `_cg_aws_related_posts`
+- `_cg_azure_name`
+- `_cg_azure_short_description`
+- `_cg_azure_official_docs_url`
+- `_cg_azure_related_posts`
+- `_cg_gcp_name`
+- `_cg_gcp_short_description`
+- `_cg_gcp_official_docs_url`
+- `_cg_gcp_related_posts`
 
 ## Security Model
 
@@ -78,13 +69,6 @@ Meta appears under `meta` for users with proper capability.
 - AJAX endpoints: nonce + `edit_posts` capability checks
 - Input sanitation on save
 
-## Known Scope (Not Yet Implemented)
-
-- CSV import/export
-- Compare mode, modal UX, schema output, tests
-
 ## Next Docs
-
-For internal architecture and contribution workflow, see:
 
 - `docs/DEVELOPMENT.md`

@@ -27,7 +27,7 @@ foreach ( $post_ids as $post_id ) {
 	wp_delete_post( $post_id, true );
 }
 
-$taxonomies = array( 'cloud_provider', 'cloud_category' );
+$taxonomies = array( 'cloud_category' );
 
 foreach ( $taxonomies as $taxonomy ) {
 	$terms = get_terms(

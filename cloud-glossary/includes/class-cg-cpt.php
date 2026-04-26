@@ -11,10 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CG_CPT {
 
-	const POST_TYPE      = 'cloud_service';
-	const TAX_PROVIDER   = 'cloud_provider';
-	const TAX_CATEGORY   = 'cloud_category';
-	const ARCHIVE_SLUG   = 'cloud-szolgaltatasok';
+	const POST_TYPE    = 'cloud_service';
+	const TAX_CATEGORY = 'cloud_category';
+	const ARCHIVE_SLUG = 'cloud-szolgaltatasok';
 
 	/**
 	 * Register hooks.
@@ -33,18 +32,18 @@ class CG_CPT {
 			'menu_name'             => __( 'Cloud Szolgáltatások', 'cloud-glossary' ),
 			'name_admin_bar'        => __( 'Cloud Szolgáltatás', 'cloud-glossary' ),
 			'add_new'               => __( 'Új hozzáadása', 'cloud-glossary' ),
-			'add_new_item'          => __( 'Új cloud szolgáltatás hozzáadása', 'cloud-glossary' ),
-			'new_item'              => __( 'Új cloud szolgáltatás', 'cloud-glossary' ),
-			'edit_item'             => __( 'Cloud szolgáltatás szerkesztése', 'cloud-glossary' ),
-			'view_item'             => __( 'Cloud szolgáltatás megtekintése', 'cloud-glossary' ),
-			'all_items'             => __( 'Összes cloud szolgáltatás', 'cloud-glossary' ),
-			'search_items'          => __( 'Cloud szolgáltatások keresése', 'cloud-glossary' ),
-			'not_found'             => __( 'Nem található cloud szolgáltatás.', 'cloud-glossary' ),
-			'not_found_in_trash'    => __( 'A kukában sincs cloud szolgáltatás.', 'cloud-glossary' ),
-			'featured_image'        => __( 'Cloud szolgáltatás képe', 'cloud-glossary' ),
-			'set_featured_image'    => __( 'Cloud szolgáltatás képének beállítása', 'cloud-glossary' ),
-			'remove_featured_image' => __( 'Cloud szolgáltatás képének eltávolítása', 'cloud-glossary' ),
-			'use_featured_image'    => __( 'Beállítás cloud szolgáltatás képeként', 'cloud-glossary' ),
+			'add_new_item'          => __( 'Új cloud fogalom hozzáadása', 'cloud-glossary' ),
+			'new_item'              => __( 'Új cloud fogalom', 'cloud-glossary' ),
+			'edit_item'             => __( 'Cloud fogalom szerkesztése', 'cloud-glossary' ),
+			'view_item'             => __( 'Cloud fogalom megtekintése', 'cloud-glossary' ),
+			'all_items'             => __( 'Összes cloud fogalom', 'cloud-glossary' ),
+			'search_items'          => __( 'Cloud fogalmak keresése', 'cloud-glossary' ),
+			'not_found'             => __( 'Nem található cloud fogalom.', 'cloud-glossary' ),
+			'not_found_in_trash'    => __( 'A kukában sincs cloud fogalom.', 'cloud-glossary' ),
+			'featured_image'        => __( 'Cloud fogalom képe', 'cloud-glossary' ),
+			'set_featured_image'    => __( 'Cloud fogalom képének beállítása', 'cloud-glossary' ),
+			'remove_featured_image' => __( 'Cloud fogalom képének eltávolítása', 'cloud-glossary' ),
+			'use_featured_image'    => __( 'Beállítás cloud fogalom képeként', 'cloud-glossary' ),
 		);
 
 		register_post_type(
@@ -67,27 +66,6 @@ class CG_CPT {
 				'capability_type'    => 'post',
 				'publicly_queryable' => true,
 				'query_var'          => true,
-			)
-		);
-
-		register_taxonomy(
-			self::TAX_PROVIDER,
-			self::POST_TYPE,
-			array(
-				'labels'            => array(
-					'name'          => __( 'Szolgáltatók', 'cloud-glossary' ),
-					'singular_name' => __( 'Szolgáltató', 'cloud-glossary' ),
-				),
-				'public'            => true,
-				'show_ui'           => true,
-				'show_admin_column' => true,
-				'show_in_rest'      => true,
-				'rest_base'         => 'cloud-providers',
-				'hierarchical'      => true,
-				'meta_box_cb'       => 'post_categories_meta_box',
-				'rewrite'           => array(
-					'slug' => 'cloud-szolgaltato',
-				),
 			)
 		);
 
@@ -124,13 +102,6 @@ class CG_CPT {
 	 * Seed default taxonomy terms.
 	 */
 	public static function seed_default_terms() {
-		$provider_terms = array(
-			'aws'     => 'AWS',
-			'azure'   => 'Azure',
-			'gcp'     => 'GCP',
-			'generic' => __( 'Általános', 'cloud-glossary' ),
-		);
-
 		$category_terms = array(
 			'halozat'          => __( 'Hálózat', 'cloud-glossary' ),
 			'biztonsag'        => __( 'Biztonság', 'cloud-glossary' ),
@@ -140,7 +111,6 @@ class CG_CPT {
 			'egyeb'            => __( 'Egyéb', 'cloud-glossary' ),
 		);
 
-		self::insert_terms( self::TAX_PROVIDER, $provider_terms );
 		self::insert_terms( self::TAX_CATEGORY, $category_terms );
 	}
 

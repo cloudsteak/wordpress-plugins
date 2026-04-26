@@ -72,7 +72,7 @@
     input?.addEventListener('input', debounce(() => {
       const q = input.value.trim();
       if (q.length < 2) { results = []; active = -1; renderResults(); return; }
-      req(wrap.dataset.action, q, { exclude_provider: wrap.dataset.excludeProvider || '' }).then((res) => {
+      req(wrap.dataset.action, q).then((res) => {
         results = Array.isArray(res) ? res : []; active = results.length ? 0 : -1; renderResults();
       }).catch(() => { results = []; active = -1; renderResults(); });
     }, 250));

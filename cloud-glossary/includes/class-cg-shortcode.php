@@ -45,6 +45,11 @@ class CG_Shortcode {
 					'providerAzure'    => __( 'Azure', 'cloud-glossary' ),
 					'providerGcp'      => __( 'GCP', 'cloud-glossary' ),
 					'providerGeneric'  => __( 'Általános', 'cloud-glossary' ),
+					'genericTerm'      => __( 'Fogalom', 'cloud-glossary' ),
+					'info'             => __( 'Részletek', 'cloud-glossary' ),
+					'openDocs'         => __( 'Dokumentáció megnyitása ↗', 'cloud-glossary' ),
+					'relatedPosts'     => __( 'Kapcsolódó bejegyzések', 'cloud-glossary' ),
+					'noDescription'    => __( 'Nincs rövid leírás megadva.', 'cloud-glossary' ),
 				),
 			)
 		);

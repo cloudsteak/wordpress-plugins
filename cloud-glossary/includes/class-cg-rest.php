@@ -120,11 +120,7 @@ class CG_Rest {
 			)
 		);
 
-		$services = array();
-
-		foreach ( $posts as $post ) {
-			$services[] = $this->serialize_service( $post );
-		}
+		$services = array_map( array( $this, 'serialize_service' ), $posts );
 
 		usort(
 			$services,
@@ -148,25 +144,39 @@ class CG_Rest {
 	 * @return array
 	 */
 	private function serialize_service( $post ) {
-		$service_id         = (int) $post->ID;
-		$equivalent_ids     = get_post_meta( $service_id, '_cg_equivalents', true );
-		$related_posts_meta = get_post_meta( $service_id, '_cg_related_posts', true );
+		$service_id = (int) $post->ID;
 
-		$equivalent_ids     = is_array( $equivalent_ids ) ? array_values( array_map( 'intval', $equivalent_ids ) ) : array();
-		$related_posts_meta = is_array( $related_posts_meta ) ? $related_posts_meta : array();
+		return array(
+			'id'          => $service_id,
+			'slug'        => $post->post_name,
+			'title'       => get_the_title( $post ),
+			'description' => wp_strip_all_tags( (string) $post->post_content ),
+			'category'    => CG_Admin::get_single_term_slug( $service_id, CG_CPT::TAX_CATEGORY ),
+			'order'       => (int) get_post_meta( $service_id, '_cg_order', true ),
+			'providers'   => array(
+				'aws'   => $this->provider_payload( $service_id, 'aws' ),
+				'azure' => $this->provider_payload( $service_id, 'azure' ),
+				'gcp'   => $this->provider_payload( $service_id, 'gcp' ),
+			),
+		);
+	}
 
-		$equivalents = array();
-		foreach ( $equivalent_ids as $equivalent_id ) {
-			$equivalent_post = get_post( $equivalent_id );
-			if ( ! $equivalent_post || CG_CPT::POST_TYPE !== $equivalent_post->post_type || 'publish' !== $equivalent_post->post_status ) {
-				continue;
-			}
-
-			$equivalents[] = $equivalent_post->post_name;
-		}
+	/**
+	 * Build provider payload.
+	 *
+	 * @param int    $service_id Service ID.
+	 * @param string $provider Provider slug.
+	 * @return array
+	 */
+	private function provider_payload( $service_id, $provider ) {
+		$name        = (string) get_post_meta( $service_id, '_cg_' . $provider . '_name', true );
+		$description = (string) get_post_meta( $service_id, '_cg_' . $provider . '_short_description', true );
+		$docs_url    = (string) get_post_meta( $service_id, '_cg_' . $provider . '_official_docs_url', true );
+		$related_raw = get_post_meta( $service_id, '_cg_' . $provider . '_related_posts', true );
+		$related_raw = is_array( $related_raw ) ? $related_raw : array();
 
 		$related_posts = array();
-		foreach ( $related_posts_meta as $item ) {
+		foreach ( $related_raw as $item ) {
 			if ( ! is_array( $item ) || empty( $item['post_id'] ) ) {
 				continue;
 			}
@@ -184,16 +194,10 @@ class CG_Rest {
 		}
 
 		return array(
-			'id'                => $service_id,
-			'slug'              => $post->post_name,
-			'title'             => get_the_title( $post ),
-			'provider'          => CG_Admin::get_single_term_slug( $service_id, CG_CPT::TAX_PROVIDER ),
-			'category'          => CG_Admin::get_single_term_slug( $service_id, CG_CPT::TAX_CATEGORY ),
-			'short_description' => (string) get_post_meta( $service_id, '_cg_short_description', true ),
-			'official_docs_url' => (string) get_post_meta( $service_id, '_cg_official_docs_url', true ),
-			'equivalents'       => array_values( array_unique( $equivalents ) ),
+			'name'              => $name,
+			'short_description' => $description,
+			'official_docs_url' => $docs_url,
 			'related_posts'     => $related_posts,
-			'order'             => (int) get_post_meta( $service_id, '_cg_order', true ),
 		);
 	}
 
@@ -205,14 +209,7 @@ class CG_Rest {
 	}
 
 	/**
-	 * Invalidate cache when service terms are changed.
-	 *
-	 * @param int    $object_id  Object ID.
-	 * @param array  $terms      Term slugs or IDs.
-	 * @param array  $tt_ids     Term taxonomy IDs.
-	 * @param string $taxonomy   Taxonomy slug.
-	 * @param bool   $append     Whether terms were appended.
-	 * @param array  $old_tt_ids Old term taxonomy IDs.
+	 * Invalidate cache when category terms are changed on cloud_service.
 	 */
 	public function invalidate_on_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		unset( $terms, $tt_ids, $append, $old_tt_ids );
@@ -221,42 +218,29 @@ class CG_Rest {
 			return;
 		}
 
-		if ( CG_CPT::TAX_PROVIDER !== $taxonomy && CG_CPT::TAX_CATEGORY !== $taxonomy ) {
-			return;
+		if ( CG_CPT::TAX_CATEGORY === $taxonomy ) {
+			self::invalidate_services_cache();
 		}
-
-		self::invalidate_services_cache();
 	}
 
 	/**
 	 * Invalidate cache on term create/edit.
-	 *
-	 * @param int    $term_id  Term ID.
-	 * @param int    $tt_id    Term taxonomy ID.
-	 * @param string $taxonomy Taxonomy.
-	 * @param array  $args     Insert/update args.
 	 */
 	public function invalidate_on_term_event( $term_id, $tt_id, $taxonomy, $args ) {
 		unset( $term_id, $tt_id, $args );
 
-		if ( CG_CPT::TAX_PROVIDER === $taxonomy || CG_CPT::TAX_CATEGORY === $taxonomy ) {
+		if ( CG_CPT::TAX_CATEGORY === $taxonomy ) {
 			self::invalidate_services_cache();
 		}
 	}
 
 	/**
 	 * Invalidate cache on term delete.
-	 *
-	 * @param int    $term         Term ID.
-	 * @param int    $tt_id        Term taxonomy ID.
-	 * @param string $taxonomy     Taxonomy.
-	 * @param mixed  $deleted_term Deleted term object.
-	 * @param array  $object_ids   Affected object IDs.
 	 */
 	public function invalidate_on_term_delete( $term, $tt_id, $taxonomy, $deleted_term, $object_ids ) {
 		unset( $term, $tt_id, $deleted_term, $object_ids );
 
-		if ( CG_CPT::TAX_PROVIDER === $taxonomy || CG_CPT::TAX_CATEGORY === $taxonomy ) {
+		if ( CG_CPT::TAX_CATEGORY === $taxonomy ) {
 			self::invalidate_services_cache();
 		}
 	}
