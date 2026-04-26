@@ -27,6 +27,8 @@ class CG_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', array( $this, 'render_usage_notice' ) );
 		add_action( 'admin_menu', array( $this, 'register_usage_submenu' ) );
+		add_action( 'admin_menu', array( $this, 'register_settings_submenu' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
 	}
 
 	/**
@@ -309,6 +311,64 @@ class CG_Admin {
 	}
 
 	/**
+	 * Register settings submenu under Cloud Services.
+	 */
+	public function register_settings_submenu() {
+		add_submenu_page(
+			'edit.php?post_type=' . CG_CPT::POST_TYPE,
+			__( 'Beállítások', 'cloud-glossary' ),
+			__( 'Beállítások', 'cloud-glossary' ),
+			'manage_options',
+			'cg-settings',
+			array( $this, 'render_settings_page' )
+		);
+	}
+
+	/**
+	 * Register settings and fields.
+	 */
+	public function register_settings() {
+		register_setting(
+			'cg_settings_group',
+			'cg_layout_settings',
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_layout_settings' ),
+				'default'           => $this->get_default_layout_settings(),
+			)
+		);
+
+		add_settings_section(
+			'cg_layout_section',
+			__( 'Glossary megjelenés', 'cloud-glossary' ),
+			'__return_false',
+			'cg-settings'
+		);
+
+		$fields = array(
+			'desktop_width'   => __( 'Desktop szélesség', 'cloud-glossary' ),
+			'desktop_padding' => __( 'Desktop padding (bal/jobb)', 'cloud-glossary' ),
+			'tablet_width'    => __( 'Tablet szélesség', 'cloud-glossary' ),
+			'tablet_padding'  => __( 'Tablet padding (bal/jobb)', 'cloud-glossary' ),
+			'mobile_width'    => __( 'Mobile szélesség', 'cloud-glossary' ),
+			'mobile_padding'  => __( 'Mobile padding (bal/jobb)', 'cloud-glossary' ),
+		);
+
+		foreach ( $fields as $key => $label ) {
+			add_settings_field(
+				'cg_layout_' . $key,
+				$label,
+				array( $this, 'render_layout_input' ),
+				'cg-settings',
+				'cg_layout_section',
+				array(
+					'key' => $key,
+				)
+			);
+		}
+	}
+
+	/**
 	 * Render usage admin page.
 	 */
 	public function render_usage_page() {
@@ -322,6 +382,103 @@ class CG_Admin {
 			<p><code>[cloud_glossary]</code></p>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render settings admin page.
+	 */
+	public function render_settings_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Nincs jogosultságod az oldal megtekintéséhez.', 'cloud-glossary' ) );
+		}
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html__( 'Cloud Glossary beállítások', 'cloud-glossary' ); ?></h1>
+			<p><?php echo esc_html__( 'Itt állítható a Cloud Szótár szélessége és vízszintes paddingje külön Desktop, Tablet és Mobile nézetre.', 'cloud-glossary' ); ?></p>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'cg_settings_group' );
+				do_settings_sections( 'cg-settings' );
+				submit_button( __( 'Mentés', 'cloud-glossary' ) );
+				?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render one layout setting input.
+	 *
+	 * @param array $args Field args.
+	 */
+	public function render_layout_input( $args ) {
+		$key      = isset( $args['key'] ) ? sanitize_key( (string) $args['key'] ) : '';
+		$settings = $this->get_layout_settings();
+		$value    = isset( $settings[ $key ] ) ? (string) $settings[ $key ] : '';
+
+		echo '<input type="text" class="regular-text" name="cg_layout_settings[' . esc_attr( $key ) . ']" value="' . esc_attr( $value ) . '" />';
+		echo '<p class="description">' . esc_html__( 'Példa: 95vw, 100%, 1200px, 2rem', 'cloud-glossary' ) . '</p>';
+	}
+
+	/**
+	 * Sanitize layout settings option.
+	 *
+	 * @param mixed $value Raw option value.
+	 * @return array
+	 */
+	public function sanitize_layout_settings( $value ) {
+		$defaults = $this->get_default_layout_settings();
+		$raw      = is_array( $value ) ? $value : array();
+		$clean    = array();
+
+		foreach ( $defaults as $key => $default ) {
+			$input = isset( $raw[ $key ] ) ? trim( (string) $raw[ $key ] ) : '';
+			if ( '' === $input ) {
+				$clean[ $key ] = $default;
+				continue;
+			}
+
+			if ( ! preg_match( '/^\d+(?:\.\d+)?(?:px|%|vw|rem|em)$/', $input ) ) {
+				$clean[ $key ] = $default;
+				continue;
+			}
+
+			$clean[ $key ] = $input;
+		}
+
+		return $clean;
+	}
+
+	/**
+	 * Get merged layout settings.
+	 *
+	 * @return array
+	 */
+	private function get_layout_settings() {
+		$defaults = $this->get_default_layout_settings();
+		$value    = get_option( 'cg_layout_settings', array() );
+
+		if ( ! is_array( $value ) ) {
+			return $defaults;
+		}
+
+		return array_merge( $defaults, $value );
+	}
+
+	/**
+	 * Layout setting defaults.
+	 *
+	 * @return array
+	 */
+	private function get_default_layout_settings() {
+		return array(
+			'desktop_width'   => '95vw',
+			'desktop_padding' => '5%',
+			'tablet_width'    => '95vw',
+			'tablet_padding'  => '5%',
+			'mobile_width'    => '95vw',
+			'mobile_padding'  => '5%',
+		);
 	}
 
 	/**

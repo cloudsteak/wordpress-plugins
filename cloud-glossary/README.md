@@ -37,6 +37,13 @@ Aktuális státusz: a koncepció-központú adatmodell + admin + REST + frontend
 5. Mentés/közzététel.
 6. Szúrj be `[cloud_glossary]`-t egy oldalba vagy bejegyzésbe.
 
+## Elrendezés Beállítások
+
+1. Nyisd meg: **Cloud Szolgáltatások → Beállítások**.
+2. Add meg külön a Desktop/Tablet/Mobile szélességet és bal/jobb padding értéket.
+3. Érvényes formátumok: `px`, `%`, `vw`, `rem`, `em` (példa: `95vw`, `5%`).
+4. Mentés után a shortcode felület azonnal az új értékeket használja.
+
 ## Adatmodell
 
 ### Post Type

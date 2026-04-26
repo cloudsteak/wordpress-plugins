@@ -15,6 +15,7 @@ A plugin egy **koncepció-központú modellt** használ:
 - `includes/class-cg-cpt.php`: CPT + kategória taxonomia regisztrálása
 - `includes/class-cg-meta.php`: szolgáltató blokk meta felület, mentési kezelők, meta regisztráció, automatikus kitöltés AJAX
 - `includes/class-cg-admin.php`: lista felhasználói élmény, szűrők, másolás funkció, használati képernyő
+- `includes/class-cg-admin.php`: lista felhasználói élmény, szűrők, másolás funkció, használati képernyő, layout beállítások
 - `includes/class-cg-rest.php`: `cloud-glossary/v1` végpontok + gyorsítótár invalidálása
 - `includes/class-cg-shortcode.php`: `[cloud_glossary]` megjelenítés és eszközök betöltése
 - `assets/js/glossary.js`: frontend megjelenítési logika
@@ -44,6 +45,19 @@ Szolgáltatónkénti mezők (`aws`/`azure`/`gcp`):
 - `providers.aws|azure|gcp` az alábbiak szerint:
   - `name`, `short_description`, `official_docs_url`, `related_posts`
 
+## Layout Beállítások (Admin)
+
+- Option key: `cg_layout_settings`
+- Mezők:
+- `desktop_width`
+- `desktop_padding`
+- `tablet_width`
+- `tablet_padding`
+- `mobile_width`
+- `mobile_padding`
+- Validált mértékegységek: `px`, `%`, `vw`, `rem`, `em`
+- Frontend átadás: a shortcode wrapper inline CSS változókon keresztül adja át (`--cg-width-*`, `--cg-padding-*`)
+
 ## Biztonságos Bővítési Szabályok
 
 1. Bármely új szolgáltatótípusú mező hozzáadása minden rétegben szükséges:
@@ -63,4 +77,3 @@ Szolgáltatónkénti mezők (`aws`/`azure`/`gcp`):
 3. Ellenőrizd a REST válasz szerkezetét.
 4. Ellenőrizd, hogy a `[cloud_glossary]` egy sort jelenít meg fogalonként.
 5. Ellenőrizd, hogy az info modal megjeleníti a szolgáltató leírását és dokumentációs linket.
-
