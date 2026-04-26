@@ -2,7 +2,7 @@
 
 Cloud Glossary is a WordPress plugin for managing cloud service entries (AWS, Azure, GCP, generic) with a dedicated custom post type, taxonomies, and admin productivity tools.
 
-Current status: **Phase 1-3 implemented**.
+Current status: **Phase 1-4 implemented**.
 
 ## What Is Implemented
 
@@ -80,7 +80,6 @@ Meta appears under `meta` for users with proper capability.
 
 ## Known Scope (Not Yet Implemented)
 
-- `[cloud_glossary]` frontend shortcode UI
 - CSV import/export
 - Compare mode, modal UX, schema output, tests
 
