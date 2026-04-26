@@ -1,53 +1,53 @@
 # Cloud Glossary
 
-Cloud Glossary is a WordPress plugin for managing **cloud concepts** and their AWS/Azure/GCP mappings.
+A Cloud Glossary egy WordPress plugin, amely **felhő fogalmak** és azok AWS/Azure/GCP leképezésének kezelésére szolgál.
 
-Current status: concept-first data model + admin + REST + frontend shortcode are implemented.
+Aktuális státusz: a koncepció-központú adatmodell + admin + REST + frontend shortcode implementálva van.
 
-## What Is Implemented
+## Mit Implementáltunk
 
-- Custom post type: `cloud_service` (one record = one generic concept)
-- Taxonomy: `cloud_category`
-- Meta box with provider blocks: AWS / Azure / GCP
-- Central order field: `_cg_order`
-- Provider fields per block:
-  - `name`
-  - `short_description`
-  - `official_docs_url`
-  - `related_posts`
+- Custom post type: `cloud_service` (egy rekord = egy generikus koncepció)
+- Taxonomia: `cloud_category`
+- Meta box szolgáltató blokkokkal: AWS / Azure / GCP
+- Központi sorrendi mező: `_cg_order`
+- Szolgáltató mezők blokkonként:
+  - `name` (név)
+  - `short_description` (rövid leírás)
+  - `official_docs_url` (hivatalos dokumentáció URL)
+  - `related_posts` (kapcsolódó bejegyzések)
 - REST API:
   - `GET /wp-json/cloud-glossary/v1/services`
   - `GET /wp-json/cloud-glossary/v1/services/{id}`
 - Frontend shortcode: `[cloud_glossary]`
 
-## Installation
+## Telepítés
 
-1. Copy `cloud-glossary/` into `wp-content/plugins/`.
-2. Activate **Cloud Glossary** in WP Admin > Plugins.
-3. On activation, rewrite rules are flushed and default category terms are created.
+1. Másold a `cloud-glossary/` mappát a `wp-content/plugins/` könyvtárba.
+2. Aktiváld a **Cloud Glossary** plugint a WP Admin > Bővítmények menüben.
+3. Aktiváláskor a rewrite rules kiürülnek és az alapértelmezett kategória kifejezések létrejönnek.
 
-## Quick Usage
+## Gyors Használati Útmutató
 
-1. Open **Cloud Szolgáltatások** in admin.
-2. Create a new concept entry:
-  - title = generic concept name
-  - content = generic concept description
-3. Select a category.
-4. Fill AWS / Azure / GCP blocks in **Szolgáltatás részletei (szolgáltatónként)**.
-5. Save/publish.
-6. Insert `[cloud_glossary]` into a page/post.
+1. Nyisd meg a **Cloud Szolgáltatások** menüt az adminisztrációban.
+2. Hozz létre egy új koncepció bejegyzést:
+  - cím = generikus koncepció neve
+  - tartalom = generikus koncepció leírása
+3. Válassz egy kategóriát.
+4. Töltsd ki az AWS / Azure / GCP blokkokat a **Szolgáltatás részletei (szolgáltatónként)** szekcióban.
+5. Mentés/közzététel.
+6. Szúrj be `[cloud_glossary]`-t egy oldalba vagy bejegyzésbe.
 
-## Data Model
+## Adatmodell
 
 ### Post Type
 
 - `cloud_service`
 
-### Taxonomy
+### Taxonomia
 
 - `cloud_category`
 
-### Meta Keys
+### Meta Kulcsok
 
 - `_cg_order`
 - `_cg_aws_name`
@@ -63,12 +63,12 @@ Current status: concept-first data model + admin + REST + frontend shortcode are
 - `_cg_gcp_official_docs_url`
 - `_cg_gcp_related_posts`
 
-## Security Model
+## Biztonsági Modell
 
-- Meta save: nonce + capability + autosave guards
-- AJAX endpoints: nonce + `edit_posts` capability checks
-- Input sanitation on save
+- Meta mentés: nonce + capability + autosave védelem
+- AJAX végpontok: nonce + `edit_posts` capability ellenőrzések
+- Bemeneti adatok szanitálása mentéskor
 
-## Next Docs
+## Következő Dokumentáció
 
 - `docs/DEVELOPMENT.md`
