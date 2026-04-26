@@ -24,17 +24,20 @@ $layout_style = sprintf(
 	<div class="cg-legend cg-raised" aria-label="<?php echo esc_attr__( 'Színjelmagyarázat', 'cloud-glossary' ); ?>">
 		<span class="cg-legend__item">
 			<span class="cg-icon cg-icon--aws" aria-hidden="true"></span>
-			<span><?php echo esc_html__( 'AWS', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Amazon Web Services', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'AWS', 'cloud-glossary' ); ?></span>
 		</span>
 		<span class="cg-legend__sep" aria-hidden="true">|</span>
 		<span class="cg-legend__item">
 			<span class="cg-icon cg-icon--azure" aria-hidden="true"></span>
-			<span><?php echo esc_html__( 'Azure', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Microsoft Azure', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'Azure', 'cloud-glossary' ); ?></span>
 		</span>
 		<span class="cg-legend__sep" aria-hidden="true">|</span>
 		<span class="cg-legend__item">
 			<span class="cg-icon cg-icon--gcp" aria-hidden="true"></span>
-			<span><?php echo esc_html__( 'GCP', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Google Cloud Platform', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'GCP', 'cloud-glossary' ); ?></span>
 		</span>
 	</div>
 	<div class="cg-toolbar cg-raised">

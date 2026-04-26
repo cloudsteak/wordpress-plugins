@@ -17,6 +17,7 @@
 .cg-legend{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 10px;margin-bottom:12px;font-size:12px;font-weight:600;flex-wrap:nowrap}
 .cg-legend__item{display:inline-flex;align-items:center;gap:6px;color:var(--cg-text)}
 .cg-legend__sep{color:var(--cg-text-faint);font-weight:400}
+.cg-legend__label--short{display:none}
 .cg-search{border:0;outline:0;padding:10px 12px;color:var(--cg-text);width:100%;font-size:15px}
 .cg-theme-toggle{border:0;cursor:pointer;padding:10px 14px;color:var(--cg-text);font-weight:600}
 .cg-root{margin-top:14px;display:grid;gap:12px}
@@ -59,4 +60,4 @@
 .cg-modal__content p{margin:6px 0}
 .cg-docs-link{display:inline-block;margin-top:8px;color:var(--cg-primary);font-weight:600}
 @media (max-width:1024px){.cg-glossary-wrapper{width:var(--cg-width-tablet,95vw)!important;max-width:var(--cg-width-tablet,95vw)!important;padding-inline:var(--cg-padding-tablet,5%)!important}}
-@media (max-width:767px){.cg-glossary-wrapper{width:var(--cg-width-mobile,95vw)!important;max-width:var(--cg-width-mobile,95vw)!important;padding-inline:var(--cg-padding-mobile,5%)!important}.cg-legend{justify-content:center;gap:8px;padding:8px 10px}.cg-table-wrap{display:none}.cg-mobile{display:grid}.cg-mobile-card{padding:10px}.cg-cell{min-height:unset}.cg-modal{align-items:center;justify-items:center;padding:12px}.cg-modal__dialog{position:relative;width:min(94vw,640px);max-width:94vw;box-sizing:border-box;margin:0;border-radius:14px;max-height:85vh;overflow:auto}}
+@media (max-width:767px){.cg-glossary-wrapper{width:var(--cg-width-mobile,95vw)!important;max-width:var(--cg-width-mobile,95vw)!important;padding-inline:var(--cg-padding-mobile,5%)!important}.cg-legend{justify-content:center;gap:8px;padding:8px 10px}.cg-legend__label--long{display:none}.cg-legend__label--short{display:inline}.cg-table-wrap{display:none}.cg-mobile{display:grid}.cg-mobile-card{padding:10px}.cg-cell{min-height:unset}.cg-modal{align-items:center;justify-items:center;padding:12px}.cg-modal__dialog{position:relative;width:min(94vw,640px);max-width:94vw;box-sizing:border-box;margin:0;border-radius:14px;max-height:85vh;overflow:auto}}
