@@ -21,6 +21,22 @@ $layout_style = sprintf(
 );
 ?>
 <div class="cg-glossary-wrapper" data-theme="light" style="<?php echo esc_attr( $layout_style ); ?>">
+	<div class="cg-legend cg-raised" aria-label="<?php echo esc_attr__( 'Színjelmagyarázat', 'cloud-glossary' ); ?>">
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--aws" aria-hidden="true"></span>
+			<span><?php echo esc_html__( 'AWS', 'cloud-glossary' ); ?></span>
+		</span>
+		<span class="cg-legend__sep" aria-hidden="true">|</span>
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--azure" aria-hidden="true"></span>
+			<span><?php echo esc_html__( 'Azure', 'cloud-glossary' ); ?></span>
+		</span>
+		<span class="cg-legend__sep" aria-hidden="true">|</span>
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--gcp" aria-hidden="true"></span>
+			<span><?php echo esc_html__( 'GCP', 'cloud-glossary' ); ?></span>
+		</span>
+	</div>
 	<div class="cg-toolbar cg-raised">
 		<input type="search" class="cg-search cg-sunken" id="cg-search" />
 		<button type="button" id="cg-theme-toggle" class="cg-theme-toggle cg-raised"></button>
