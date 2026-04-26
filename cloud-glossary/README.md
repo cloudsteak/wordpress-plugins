@@ -69,6 +69,6 @@ Aktuális státusz: a koncepció-központú adatmodell + admin + REST + frontend
 - AJAX végpontok: nonce + `edit_posts` capability ellenőrzések
 - Bemeneti adatok szanitálása mentéskor
 
-## Következő Dokumentáció
+## További Dokumentáció
 
 - `docs/DEVELOPMENT.md`
