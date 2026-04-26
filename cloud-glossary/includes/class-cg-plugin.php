@@ -40,12 +40,14 @@ class CG_Plugin {
 		$meta  = new CG_Meta();
 		$admin = new CG_Admin();
 		$rest  = new CG_Rest();
+		$shortcode = new CG_Shortcode();
 
 		$cpt->init();
 		$i18n->init();
 		$meta->init();
 		$admin->init();
 		$rest->init();
+		$shortcode->init();
 	}
 
 	/**
