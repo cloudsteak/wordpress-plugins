@@ -112,7 +112,7 @@ function lab_launcher_render_user_statuses_page() {
         $started_at = $status_meta[$key]['started_at'] ?? '';
 
         if ($started_at) {
-            $timestamp = mysql2date('U', $started_at, false);
+            $timestamp = mysql2date('G', get_gmt_from_date($started_at));
             $started_at_display = $timestamp ? wp_date('Y-m-d H:i:s', $timestamp) : $started_at;
         } else {
             $started_at_display = 'Nincs adat';

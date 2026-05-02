@@ -3,7 +3,7 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.1.7
+ * Version: 1.1.8
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
@@ -214,13 +214,13 @@ function lab_launcher_get_effective_status($email, $lab_id, $persist = true)
     $ready_at = $lab_meta['ready_at'] ?? '';
     $lab_ttl = intval($lab_meta['lab_ttl'] ?? 0);
     $expiry_base_at = $ready_at ?: $started_at;
-    $expiry_base_timestamp = $expiry_base_at ? intval(mysql2date('U', $expiry_base_at, false)) : 0;
+    $expiry_base_timestamp = $expiry_base_at ? intval(mysql2date('G', get_gmt_from_date($expiry_base_at))) : 0;
 
     if (
         $expiry_base_timestamp > 0
         && $lab_ttl > 0
         && $raw_status === 'success'
-        && ($expiry_base_timestamp + $lab_ttl) <= current_time('timestamp')
+        && ($expiry_base_timestamp + $lab_ttl) <= time()
     ) {
         if ($persist && $raw_status !== 'expired') {
             lab_launcher_set_status_value($email, $lab_id, 'expired');
@@ -271,11 +271,11 @@ function lab_launcher_status_update($request)
     $status = lab_launcher_get_effective_status($email, $lab_id);
     $meta = lab_launcher_get_status_meta_for_lab($email, $lab_id);
     $started_at = $meta['started_at'] ?? '';
-    $started_at_timestamp = $started_at ? intval(mysql2date('U', $started_at, false)) : 0;
+    $started_at_timestamp = $started_at ? intval(mysql2date('G', get_gmt_from_date($started_at))) : 0;
     $ready_at = $meta['ready_at'] ?? '';
-    $ready_at_timestamp = $ready_at ? intval(mysql2date('U', $ready_at, false)) : 0;
+    $ready_at_timestamp = $ready_at ? intval(mysql2date('G', get_gmt_from_date($ready_at))) : 0;
     $completed_at = $meta['completed_at'] ?? '';
-    $completed_at_timestamp = $completed_at ? intval(mysql2date('U', $completed_at, false)) : 0;
+    $completed_at_timestamp = $completed_at ? intval(mysql2date('G', get_gmt_from_date($completed_at))) : 0;
 
     return new WP_REST_Response([
         'status' => $status,
