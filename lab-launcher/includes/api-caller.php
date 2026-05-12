@@ -14,6 +14,7 @@ function lab_launcher_call_backend($payload, $endpoint) {
     }
 
     $token_response = wp_remote_post("https://$auth0_domain/oauth/token", array(
+        'timeout' => 15,
         'headers' => array('Content-Type' => 'application/json'),
         'body' => json_encode(array(
             'grant_type' => 'client_credentials',
@@ -35,6 +36,7 @@ function lab_launcher_call_backend($payload, $endpoint) {
     }
 
     $backend_response = wp_remote_post(trailingslashit($backend_url) . ltrim($endpoint, '/'), array(
+        'timeout' => 90,
         'headers' => array(
             'Authorization' => 'Bearer ' . $access_token,
             'Content-Type' => 'application/json'

@@ -749,8 +749,10 @@ function lab_check_enqueue_script()
 
                 console.log('Ellenőrzés indítása:', { labName, cloudProvider, username });
 
+                const originalLabel = button.innerHTML;
                 button.disabled = true;
-
+                button.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Ellenőrzés folyamatban...";
+                resultBox.innerHTML = '';
 
                 try {
                     const res = await fetch('/wp-json/lab-launcher/v1/verify-lab', {
@@ -791,8 +793,8 @@ function lab_check_enqueue_script()
                     console.error('Hiba:', e);
                     resultBox.innerHTML = `<span style='color:red;'>Hálózati hiba vagy válasz sikertelen.</span>`;
                 } finally {
-                    // Átmenetileg tiltom az újraellenőrzést
                     button.disabled = false;
+                    button.innerHTML = originalLabel;
                     // Azure Portal lab esetén mindig sikeres az ellenőrzés
                     if (labName === 'mk-7-01-portal') {
                         let verifyicon = "<i class='fa-solid fa-square-check fa-3x'></i>";
