@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.1.8  
+**Verzió:** 1.1.9  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
