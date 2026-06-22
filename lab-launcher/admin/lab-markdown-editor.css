@@ -1,0 +1,120 @@
+.lab-md-editor {
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    background: #fff;
+    max-width: 900px;
+}
+
+.lab-md-editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #c3c4c7;
+    background: #f6f7f7;
+    flex-wrap: wrap;
+}
+
+.lab-md-editor-tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.lab-md-tab {
+    border: 1px solid #c3c4c7;
+    background: #fff;
+    padding: 4px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.lab-md-tab.is-active {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.lab-md-editor-body {
+    position: relative;
+}
+
+.lab-md-textarea {
+    width: 100%;
+    min-height: 320px;
+    border: 0;
+    padding: 12px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.lab-md-preview {
+    display: none;
+    min-height: 320px;
+    padding: 12px 16px;
+    overflow: auto;
+    background: #fff;
+    line-height: 1.6;
+}
+
+.lab-md-preview.is-visible {
+    display: block;
+}
+
+.lab-md-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+.lab-md-preview h1,
+.lab-md-preview h2,
+.lab-md-preview h3,
+.lab-md-preview h4 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.lab-md-preview pre {
+  background: #f0f0f1;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 4px;
+}
+
+.lab-md-preview code {
+    background: #f0f0f1;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 0.9em;
+}
+
+.lab-md-preview blockquote {
+    border-left: 4px solid #c3c4c7;
+    margin-left: 0;
+    padding-left: 16px;
+    color: #50575e;
+}
+
+.lab-md-preview-loading {
+    color: #646970;
+    font-style: italic;
+}
+
+.lab-md-help {
+    margin-top: 8px;
+    color: #646970;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.lab-description-mode-toggle {
+    margin-bottom: 12px;
+}
+
+.lab-description-html-editor.is-hidden,
+.lab-description-md-editor.is-hidden {
+    display: none;
+}
