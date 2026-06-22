@@ -61,11 +61,16 @@ function lab_launcher_labs_page()
 
         $id = sanitize_text_field($_POST['lab_launcher_lab_id']);
 
-        $raw_desc = isset($_POST['description']) 
-            ? wp_unslash($_POST['description']) 
+        $raw_desc = isset($_POST['description'])
+            ? wp_unslash($_POST['description'])
             : '';
 
         $clean_desc = wp_kses_post($raw_desc);
+
+        $use_markdown = !empty($_POST['use_markdown_description']);
+        $raw_md = isset($_POST['description_md'])
+            ? wp_unslash($_POST['description_md'])
+            : '';
 
         $labs[$id] = array(
             'id' => $id,
@@ -75,6 +80,8 @@ function lab_launcher_labs_page()
             'lab_id' => $id,
             'cloud' => sanitize_text_field($_POST['cloud_provider']),
             'description' => $clean_desc,
+            'description_md' => $raw_md,
+            'use_markdown_description' => $use_markdown,
             'image_id' => intval($_POST['image_id']),
             'lab_ttl' => intval($_POST['lab_launcher_ttl']) ?: 5400
         );
@@ -155,20 +162,55 @@ function lab_launcher_labs_page()
                     </td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="description">Leírás</label><br><label
-                            style="font-weight: 300 !important; font-size: small;">(Oldaltörés: &#60;!-- pagebreak
-                            --&#62;)</label></th>
-                    <td><?php wp_editor(
-                        $existing_lab['description'] ?? '',
-                        'description',
-                        [
-                            'textarea_name' => 'description',
-                            'media_buttons' => true, // EZ KELL A MÉDIA GOMBHOZ
-                            'textarea_rows' => 10,
-                            'tinymce' => true,
-                            'quicktags' => true
-                        ]
-                    ); ?>
+                    <th scope="row"><label for="description">Leírás</label></th>
+                    <td>
+                        <div class="lab-description-mode-toggle">
+                            <label>
+                                <input type="checkbox" name="use_markdown_description" id="use_markdown_description"
+                                    value="1" <?php checked(!empty($existing_lab['use_markdown_description'])); ?>>
+                                Markdown leírás használata
+                            </label>
+                            <p class="description">Bekapcsolva az új Markdown mező jelenik meg a frontenden. Kikapcsolva a meglévő HTML leírás marad érvényben.</p>
+                        </div>
+
+                        <div class="lab-description-html-editor">
+                            <p class="description" style="margin-top:0;">HTML szerkesztő (TinyMCE). Oldaltörés: <code>&lt;!-- pagebreak --&gt;</code></p>
+                            <?php wp_editor(
+                                $existing_lab['description'] ?? '',
+                                'description',
+                                [
+                                    'textarea_name' => 'description',
+                                    'media_buttons' => true,
+                                    'textarea_rows' => 10,
+                                    'tinymce' => true,
+                                    'quicktags' => true
+                                ]
+                            ); ?>
+                        </div>
+
+                        <div class="lab-description-md-editor">
+                            <div class="lab-md-editor"
+                                data-preview-url="<?php echo esc_url(rest_url('lab-launcher/v1/preview-markdown')); ?>"
+                                data-nonce="<?php echo esc_attr(wp_create_nonce('wp_rest')); ?>">
+                                <div class="lab-md-editor-toolbar">
+                                    <div class="lab-md-editor-tabs">
+                                        <button type="button" class="lab-md-tab is-active" data-mode="code">Kód</button>
+                                        <button type="button" class="lab-md-tab" data-mode="preview">Előnézet</button>
+                                    </div>
+                                    <button type="button" class="button lab-md-insert-image">Kép beszúrása</button>
+                                    <button type="button" class="button lab-md-insert-pagebreak">Oldaltörés</button>
+                                </div>
+                                <div class="lab-md-editor-body">
+                                    <textarea name="description_md" class="lab-md-textarea" placeholder="Írd ide a Markdown leírást..."><?php echo esc_textarea($existing_lab['description_md'] ?? ''); ?></textarea>
+                                    <div class="lab-md-preview"></div>
+                                </div>
+                            </div>
+                            <div class="lab-md-help">
+                                <strong>Markdown szintaxis:</strong> címsorok (<code>## Cím</code>), félkövér (<code>**szöveg**</code>), kód (<code>`kód`</code>), listák, linkek.<br>
+                                <strong>Kép mérettel:</strong> <code>![leírás](url){width=400px}</code> vagy <code>{width=50%}</code><br>
+                                <strong>Oldaltörés:</strong> <code>&lt;!-- pagebreak --&gt;</code>
+                            </div>
+                        </div>
                     </td>
                 </tr>
 

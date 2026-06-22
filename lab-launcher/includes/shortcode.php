@@ -75,21 +75,7 @@ function lab_launcher_render_shortcode($atts)
         $output .= '</div>';
         $output .= '<div class="lab-description paginated">';
         $output .= '  <div class="lab-page-group">';
-
-        $paragraphs = explode('<!-- pagebreak -->', wp_kses_post($lab['description']));
-        $pageSize = 1;
-        $pageIndex = 0;
-
-        foreach (array_chunk($paragraphs, $pageSize) as $chunk) {
-            $output .= '<div class="lab-page" style="display: none;" data-page="' . $pageIndex++ . '">';
-            foreach ($chunk as $para) {
-                if (trim($para)) {
-                    $output .= $para . '</p>';
-                }
-            }
-            $output .= '</div>';
-        }
-
+        $output .= lab_launcher_render_description_pages($lab);
         $output .= '  </div>';
         $output .= '</div>';
         $output .= '<div class="lab-pagination-controls">';
@@ -245,6 +231,42 @@ function lab_launcher_enqueue_script()
                     );
                 };
             }
+        }
+
+        function initLabCodeBlockCopyButtons(root) {
+            ensureCopyHelpers();
+            const container = root || document;
+            container.querySelectorAll('.lab-description pre').forEach(function (pre) {
+                if (pre.closest('.lab-code-block-wrapper')) {
+                    return;
+                }
+
+                const codeEl = pre.querySelector('code');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'lab-code-block-wrapper';
+
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(pre);
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lab-code-copy-btn';
+                btn.title = 'Parancs másolása';
+                btn.setAttribute('aria-label', 'Parancs másolása');
+                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Másolás';
+
+                const feedback = document.createElement('span');
+                feedback.className = 'copy-feedback lab-code-copy-feedback';
+                feedback.textContent = 'Másolva!';
+
+                wrapper.appendChild(btn);
+                wrapper.appendChild(feedback);
+
+                btn.addEventListener('click', function () {
+                    const text = (codeEl ? codeEl.textContent : pre.textContent) || '';
+                    window.copyToClipboardWithFeedback(text.trim(), btn);
+                });
+            });
         }
 
         function normalizeSafeHttpUrl(rawUrl) {
@@ -535,6 +557,8 @@ function lab_launcher_enqueue_script()
 
     // 3. Leírás tördelése lapokra
     document.addEventListener('DOMContentLoaded', function () {
+        initLabCodeBlockCopyButtons();
+
         document.querySelectorAll('.lab-description.paginated').forEach(desc => {
             const pages = desc.querySelectorAll('.lab-page');
             const controls = desc.nextElementSibling;
@@ -571,7 +595,7 @@ function lab_launcher_enqueue_script()
                                 return;
                             }
 
-                            const targetHeading = currentPageElement.querySelector('h3');
+                            const targetHeading = currentPageElement.querySelector('h2, h3, h4');
                             if (targetHeading) {
                                 const offset = 110;
                                 const targetY = targetHeading.getBoundingClientRect().top + window.pageYOffset - offset;

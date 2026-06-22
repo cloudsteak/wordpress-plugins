@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.1.9  
+**Verzió:** 1.2.0  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -101,6 +101,59 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Képzéskezelés fejlesztések:** A `Képzések` oldalon egyedi `Új képzés` felirat, rendezhető hozzárendelt lab-ok, kurzusleírás megjelenítés és labonkénti státusz a shortcode nézetben
 - **Képzés előrehaladás kijelzés:** A képzés shortcode megjeleníti a kapcsolódó gyakorlatok teljesítési arányát, például `Kapcsolódó gyakorlatok (Elvégezve: 1/9 - 11%)`
 - **TTL kezelés:** Beállítható labor élettartam (Time To Live) a költségek optimalizálásához
+- **Markdown leírás (1.2.0):** Labonként választható HTML vagy natív Markdown leírás; a meglévő lab-ok alapértelmezetten HTML módban maradnak
+- **Markdown szerkesztő:** Kód és Előnézet fül, WP média picker képbeszúráshoz, oldaltörés gomb
+- **Kódrészlet másolás:** Fenced kódrészleteknél (pl. `bash`, `powershell`) Másolás gomb a parancs vágólapra helyezéséhez
+- **Lapozás görgetés:** Oldalváltáskor automatikus görgetés az oldal első címsorához (`##`, `###`, `####`)
+
+#### Lab leírás: HTML és Markdown
+
+Minden lab két leírásmezőt tartalmaz; a frontenden a **Markdown leírás használata** checkbox dönt:
+
+| Mód | Mikor használd | Megjelenítés |
+|-----|----------------|--------------|
+| HTML (alapértelmezett) | Meglévő lab-ok, TinyMCE tartalom | A régi `description` mező (wp_editor) |
+| Markdown | Új vagy átállított lab-ok | A `description_md` mező Parsedown-nal renderelve |
+
+A két mező egymás mellett marad mentve, így bármikor vissza lehet kapcsolni HTML módra adatvesztés nélkül.
+
+**Oldaltörés** (mindkét módban): `<!-- pagebreak -->`
+
+**Markdown szintaxis példák:**
+
+````markdown
+## Első lépés
+
+Szöveg **félkövérrel**, `inline kód`.
+
+![Azure portál](https://example.com/kep.png){width=600px}
+
+<!-- pagebreak -->
+
+#### Második lépés
+
+```powershell
+cd C:\Users\<felhasználónév>\Downloads
+```
+````
+
+- **Kép mérettel:** `![leírás](url){width=400px}` vagy `{width=50%}` — a média picker automatikusan generálja a szintaxist
+- **Kódrészlet:** `` ```powershell `` … `` ``` `` — a frontenden Másolás gomb jelenik meg; a téma stílusaitól független, dedikált CSS-sel
+- **Placeholderek:** A `<felhasználónév>` jellegű szövegek helyesen jelennek meg Windows-utakban is
+
+#### Shortcode használat
+
+Lab megjelenítése oldalon:
+
+```
+[lab_launcher id="azure-basic"]
+```
+
+Képzés shortcode (kapcsolódó lab-ok listája):
+
+```
+[lab_training id="123"]
+```
 
 #### Fő komponensek
 
@@ -108,6 +161,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Kurzus kezelő:** Admin felület a kurzusok és laborok konfigurálásához
 - **Felhasználói státusz:** Részletes státusz követés felhasználónként és labor típusonként
 - **Shortcode generátor:** Admin felület shortcode-ok egyszerű generálásához
+- **Markdown feldolgozó:** Parsedown alapú renderelés, kódrészletek védelme a WordPress HTML-szűrő elől
 
 #### REST API végpontok
 
@@ -115,6 +169,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - `/lab-launcher/v1/verify-lab` - Labor ellenőrzése
 - `/lab-launcher/v1/lab-status-update` - Státusz frissítés
 - `/lab-launcher/v1/lab-status-webhook` - Webhook státusz fogadás
+- `/lab-launcher/v1/preview-markdown` - Markdown előnézet (admin, szerkesztői jogosultság)
 
 #### Követelmények
 

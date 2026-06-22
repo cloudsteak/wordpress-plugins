@@ -3,13 +3,13 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.1.9
+ * Version: 1.2.0
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  * Requires at least: 6.2
- * Tested up to: 6.7.2
+ * Tested up to: 7.0.0
  * Requires PHP: 8.0
  * Text Domain: evolvia-lab-launcher
  * Domain Path: /languages
@@ -27,6 +27,7 @@ add_action('plugins_loaded', 'lab_launcher_init');
 function lab_launcher_init()
 {
 
+    require_once plugin_dir_path(__FILE__) . 'includes/markdown.php';
     require_once plugin_dir_path(__FILE__) . 'includes/shortcode.php';
     require_once plugin_dir_path(__FILE__) . 'includes/api-caller.php';
     require_once plugin_dir_path(__FILE__) . 'admin/lab-admin-page.php';

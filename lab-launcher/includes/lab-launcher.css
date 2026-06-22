@@ -94,6 +94,40 @@
   padding: 5px;
 }
 
+.lab-description img {
+  max-width: 100%;
+  height: auto;
+}
+
+.lab-description h1,
+.lab-description h2,
+.lab-description h3,
+.lab-description h4 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.lab-description pre {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 4px;
+}
+
+.lab-description code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.9em;
+}
+
+.lab-description blockquote {
+  border-left: 4px solid #999;
+  margin-left: 0;
+  padding-left: 16px;
+  color: #444;
+}
+
 .lab-header {
   font-weight: 600;
   font-size: 24px;
