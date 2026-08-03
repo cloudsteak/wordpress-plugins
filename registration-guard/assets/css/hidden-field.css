@@ -1,0 +1,17 @@
+/**
+ * Hidden honeypot field styles for Registration Guard.
+ *
+ * Combines off-screen positioning with display:none to reduce bot detection.
+ */
+
+.reg-guard-hp-wrap {
+	position: absolute !important;
+	left: -9999px !important;
+	top: -9999px !important;
+	width: 1px !important;
+	height: 1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	display: none !important;
+}
