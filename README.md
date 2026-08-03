@@ -180,8 +180,34 @@ Képzés shortcode (kapcsolódó lab-ok listája):
 
 ---
 
+### 4. Registration Guard – Anti-Spam Signup Protection
+
+**Verzió:** 1.0.0  
+**Leírás:** Bot-regisztrációk blokkolása a WordPress regisztrációs űrlapon honeypot, időzár, token ellenőrzés és IP-alapú sebességkorlátozás kombinációjával — külső API-kulcs nélkül.
+
+#### Funkciók
+
+- **Honeypot mező:** Rejtett, konfigurálható nevű input mező, amelyet a botok kitöltenek
+- **Időzár (time-trap):** Túl gyors vagy lejárt űrlap-beküldések elutasítása
+- **Token védelem:** IP-hez kötött, egyszer használatos token a közvetlen POST kérések ellen
+- **Sebességkorlát:** IP-alapú próbálkozás-limit (alapértelmezett: 3/óra), Cloudflare támogatással
+- **Naplózás:** Elutasított regisztrációs kísérletek naplózása az admin felületen (max. 500 bejegyzés)
+- **Nincs külső függőség:** Nem igényel reCAPTCHA, Turnstile vagy más harmadik fél szolgáltatást
+
+#### Használat
+
+A beállítások a WordPress admin felületen a **Beállítások → Registration Guard** menüpontban érhetők el.
+
+#### Követelmények
+
+- WordPress 6.2 vagy újabb
+- PHP 8.0 vagy újabb
+- Tesztelve WordPress 6.7.2-ig
+
+---
+
 ## Licenc
 
-Mindhárom bővítmény MIT/GPL licenc alatt érhető el.
+A bővítmények MIT/GPL licenc alatt érhetők el.
 
 

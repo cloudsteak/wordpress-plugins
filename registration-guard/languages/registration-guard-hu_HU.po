@@ -1,0 +1,155 @@
+# Copyright (C) 2026 CloudMentor
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Registration Guard 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/cloudsteak/wordpress-plugins/registration-guard\n"
+"POT-Creation-Date: 2026-07-30 12:00+0000\n"
+"PO-Revision-Date: 2026-07-30 14:00+0200\n"
+"Last-Translator: CloudMentor\n"
+"Language-Team: Hungarian\n"
+"Language: hu_HU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Manual\n"
+
+#: includes/class-rgsp-admin-settings.php:56
+#: includes/class-rgsp-admin-settings.php:57
+msgid "Registration Guard"
+msgstr "Registration Guard"
+
+#: includes/class-rgsp-admin-settings.php:122
+msgid "Protection Settings"
+msgstr "Védelmi beállítások"
+
+#: includes/class-rgsp-admin-settings.php:129
+msgid "Enable protection"
+msgstr "Védelem engedélyezése"
+
+#: includes/class-rgsp-admin-settings.php:137
+msgid "Time-trap threshold (seconds)"
+msgstr "Időzár küszöbérték (másodperc)"
+
+#: includes/class-rgsp-admin-settings.php:145
+msgid "Rate limit (attempts per hour per IP)"
+msgstr "Sebességkorlát (próbálkozás / óra / IP)"
+
+#: includes/class-rgsp-admin-settings.php:153
+msgid "Honeypot field name"
+msgstr "Honeypot mező neve"
+
+#: includes/class-rgsp-admin-settings.php:161
+msgid "Enable logging"
+msgstr "Naplózás engedélyezése"
+
+#: includes/class-rgsp-admin-settings.php:224
+msgid "Configure honeypot, time-trap, and rate limiting for the WordPress registration form."
+msgstr "A honeypot, időzár és sebességkorlát beállítása a WordPress regisztrációs űrlaphoz."
+
+#: includes/class-rgsp-admin-settings.php:237
+msgid "Block bot registrations on the signup form"
+msgstr "Bot-regisztrációk blokkolása a regisztrációs űrlapon"
+
+#: includes/class-rgsp-admin-settings.php:240
+msgid "When disabled, all protection checks are bypassed."
+msgstr "Kikapcsolva az összes ellenőrzés kihagyásra kerül."
+
+#: includes/class-rgsp-admin-settings.php:255
+msgid "Minimum seconds a visitor must spend on the form before submitting. Submissions faster than this are rejected."
+msgstr "A látogatónak ennyi másodpercet kell az űrlapon töltenie beküldés előtt. A gyorsabb beküldések elutasításra kerülnek."
+
+#: includes/class-rgsp-admin-settings.php:270
+msgid "Maximum registration attempts allowed from a single IP address within one hour."
+msgstr "Egy IP-címről engedélyezett maximális regisztrációs próbálkozások száma egy órán belül."
+
+#: includes/class-rgsp-admin-settings.php:285
+msgid "The HTML name attribute of the hidden honeypot field. Use a neutral name that does not reveal its purpose."
+msgstr "A rejtett honeypot mező HTML name attribútuma. Használjon semleges nevet, amely nem árulja el a célját."
+
+#: includes/class-rgsp-admin-settings.php:300
+msgid "Log rejected registration attempts"
+msgstr "Elutasított regisztrációs próbálkozások naplózása"
+
+#: includes/class-rgsp-admin-settings.php:312
+msgid "You do not have permission to perform this action."
+msgstr "Nincs jogosultsága ehhez a művelethez."
+
+#: includes/class-rgsp-admin-settings.php:342
+msgid "The rejection log has been cleared."
+msgstr "Az elutasítási napló törölve lett."
+
+#: includes/class-rgsp-admin-settings.php:346
+msgid "Settings saved."
+msgstr "Beállítások mentve."
+
+#: includes/class-rgsp-admin-settings.php:356
+msgid "Save Settings"
+msgstr "Beállítások mentése"
+
+#: includes/class-rgsp-admin-settings.php:362
+msgid "Rejected Registration Attempts"
+msgstr "Elutasított regisztrációs próbálkozások"
+
+#: includes/class-rgsp-admin-settings.php:363
+msgid "The most recent rejected signup attempts are listed below (up to 500 entries)."
+msgstr "Az alábbiakban láthatók a legutóbbi elutasított regisztrációs próbálkozások (legfeljebb 500 bejegyzés)."
+
+#: includes/class-rgsp-admin-settings.php:370
+msgid "Clear Log"
+msgstr "Napló ürítése"
+
+#: includes/class-rgsp-admin-settings.php:387
+msgid "Date (UTC)"
+msgstr "Dátum (UTC)"
+
+#: includes/class-rgsp-admin-settings.php:388
+msgid "IP Address"
+msgstr "IP-cím"
+
+#: includes/class-rgsp-admin-settings.php:389
+msgid "Reason"
+msgstr "Ok"
+
+#: includes/class-rgsp-admin-settings.php:395
+msgid "No rejected attempts logged yet."
+msgstr "Még nincs naplózott elutasított próbálkozás."
+
+#: includes/class-rgsp-honeypot.php:104
+msgid "Website"
+msgstr "Weboldal"
+
+#: includes/class-rgsp-honeypot.php:147
+#: includes/class-rgsp-timetrap.php:196
+#: includes/class-rgsp-timetrap.php:211
+#: includes/class-rgsp-timetrap.php:231
+#: includes/class-rgsp-timetrap.php:243
+#: includes/class-rgsp-timetrap.php:256
+msgid "Registration could not be completed. Please try again."
+msgstr "A regisztráció nem fejezhető be. Kérjük, próbálja újra."
+
+#: includes/class-rgsp-logger.php:190
+msgid "Honeypot"
+msgstr "Honeypot"
+
+#: includes/class-rgsp-logger.php:191
+msgid "Time trap"
+msgstr "Időzár"
+
+#: includes/class-rgsp-logger.php:192
+msgid "Rate limit"
+msgstr "Sebességkorlát"
+
+#: includes/class-rgsp-logger.php:193
+msgid "Invalid token"
+msgstr "Érvénytelen token"
+
+#: includes/class-rgsp-ratelimit.php:120
+#, php-format
+msgid "Too many registration attempts from your IP address. Please wait before trying again. Maximum allowed: %d attempts per hour."
+msgstr "Túl sok regisztrációs próbálkozás az Ön IP-címéről. Kérjük, várjon, mielőtt újra próbálkozna. Engedélyezett maximum: %d próbálkozás óránként."
+
+#: includes/class-rgsp-timetrap.php:265
+msgid "This registration form has expired. Please reload the page and try again."
+msgstr "A regisztrációs űrlap lejárt. Kérjük, töltse be újra az oldalt, majd próbálja meg ismét."
