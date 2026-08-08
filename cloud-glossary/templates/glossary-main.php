@@ -1,0 +1,48 @@
+<?php
+/**
+ * Main glossary shortcode template.
+ *
+ * @package CloudGlossary
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
+<?php
+$layout_style = sprintf(
+	'--cg-width-desktop:%1$s;--cg-padding-desktop:%2$s;--cg-width-tablet:%3$s;--cg-padding-tablet:%4$s;--cg-width-mobile:%5$s;--cg-padding-mobile:%6$s;',
+	esc_attr( $layout['desktop_width'] ),
+	esc_attr( $layout['desktop_padding'] ),
+	esc_attr( $layout['tablet_width'] ),
+	esc_attr( $layout['tablet_padding'] ),
+	esc_attr( $layout['mobile_width'] ),
+	esc_attr( $layout['mobile_padding'] )
+);
+?>
+<div class="cg-glossary-wrapper" data-theme="light" style="<?php echo esc_attr( $layout_style ); ?>">
+	<div class="cg-legend cg-raised" aria-label="<?php echo esc_attr__( 'Színjelmagyarázat', 'cloud-glossary' ); ?>">
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--aws" aria-hidden="true"></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Amazon Web Services', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'AWS', 'cloud-glossary' ); ?></span>
+		</span>
+		<span class="cg-legend__sep" aria-hidden="true">|</span>
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--azure" aria-hidden="true"></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Microsoft Azure', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'Azure', 'cloud-glossary' ); ?></span>
+		</span>
+		<span class="cg-legend__sep" aria-hidden="true">|</span>
+		<span class="cg-legend__item">
+			<span class="cg-icon cg-icon--gcp" aria-hidden="true"></span>
+			<span class="cg-legend__label cg-legend__label--long"><?php echo esc_html__( 'Google Cloud Platform', 'cloud-glossary' ); ?></span>
+			<span class="cg-legend__label cg-legend__label--short"><?php echo esc_html__( 'GCP', 'cloud-glossary' ); ?></span>
+		</span>
+	</div>
+	<div class="cg-toolbar cg-raised">
+		<input type="search" class="cg-search cg-sunken" id="cg-search" />
+		<button type="button" id="cg-theme-toggle" class="cg-theme-toggle cg-raised"></button>
+	</div>
+	<div id="cg-root" class="cg-root" data-endpoint="<?php echo esc_url( $endpoint ); ?>" aria-live="polite"></div>
+</div>
