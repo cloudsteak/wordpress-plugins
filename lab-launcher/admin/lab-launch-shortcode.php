@@ -10,6 +10,8 @@ if (empty($lab_launcher_user_email)) {
 }
 
 add_shortcode('lab_start', function () {
+    lab_launcher_disable_page_cache();
+
     if (!isset($_GET['id']))
         return '<p>Hiányzó lab azonosító.</p>';
 

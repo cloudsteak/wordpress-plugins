@@ -5,6 +5,8 @@ add_shortcode('lab_launcher', 'lab_launcher_render_shortcode');
 
 function lab_launcher_render_shortcode($atts)
 {
+    lab_launcher_disable_page_cache();
+
     $atts = shortcode_atts(array(
         'id' => ''
     ), $atts);

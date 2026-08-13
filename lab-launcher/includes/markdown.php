@@ -102,6 +102,11 @@ function lab_launcher_sanitize_markdown_html($html)
         $allowed['code'] = [];
     }
     $allowed['code']['class'] = true;
+    if (!isset($allowed['a'])) {
+        $allowed['a'] = [];
+    }
+    $allowed['a']['target'] = true;
+    $allowed['a']['rel'] = true;
 
     $sanitized = wp_kses($protected, $allowed);
 
@@ -112,6 +117,41 @@ function lab_launcher_sanitize_markdown_html($html)
     return $sanitized;
 }
 
+function lab_launcher_add_target_blank_to_links($html)
+{
+    if (!is_string($html) || $html === '') {
+        return '';
+    }
+
+    return preg_replace_callback(
+        '/<a\b([^>]*)>/i',
+        function ($matches) {
+            $attrs = trim($matches[1]);
+
+            $attrs = preg_replace('/\btarget\s*=\s*("|\')[^"\']*\1/i', '', $attrs);
+            $attrs = preg_replace('/\btarget\s*=\S+/i', '', $attrs);
+            $attrs = trim(preg_replace('/\s+/', ' ', $attrs));
+
+            if (preg_match('/\brel\s*=\s*("|\')([^"\']*)\1/i', $attrs, $rel_match)) {
+                $rel = trim($rel_match[2]);
+                if (stripos($rel, 'noopener') === false) {
+                    $rel = trim($rel . ' noopener noreferrer');
+                }
+                $attrs = preg_replace(
+                    '/\brel\s*=\s*("|\')[^"\']*\1/i',
+                    'rel="' . esc_attr($rel) . '"',
+                    $attrs
+                );
+            } else {
+                $attrs = trim($attrs . ' rel="noopener noreferrer"');
+            }
+
+            return '<a ' . $attrs . ' target="_blank">';
+        },
+        $html
+    );
+}
+
 function lab_launcher_parse_markdown($markdown)
 {
     if (!is_string($markdown) || trim($markdown) === '') {
@@ -120,8 +160,9 @@ function lab_launcher_parse_markdown($markdown)
 
     $preprocessed = lab_launcher_preprocess_markdown_images($markdown);
     $html = lab_launcher_get_parsedown()->text($preprocessed);
+    $html = lab_launcher_sanitize_markdown_html($html);
 
-    return lab_launcher_sanitize_markdown_html($html);
+    return lab_launcher_add_target_blank_to_links($html);
 }
 
 function lab_launcher_render_description_pages($lab)

@@ -224,6 +224,8 @@ if (!function_exists('lab_launcher_get_user_lab_status')) {
 }
 
 add_shortcode('lab_training', function ($atts) {
+    lab_launcher_disable_page_cache();
+
     static $lab_training_render_depth = 0;
     if ($lab_training_render_depth > 0) {
         return '';
