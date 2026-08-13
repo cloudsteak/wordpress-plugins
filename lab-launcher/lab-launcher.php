@@ -3,7 +3,7 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
@@ -26,18 +26,41 @@ require_once plugin_dir_path(__FILE__) . 'includes/enqueue.php';
 add_action('plugins_loaded', 'lab_launcher_init');
 function lab_launcher_init()
 {
+    $plugin_dir = plugin_dir_path(__FILE__);
 
-    require_once plugin_dir_path(__FILE__) . 'includes/markdown.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/shortcode.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/api-caller.php';
-    require_once plugin_dir_path(__FILE__) . 'admin/lab-admin-page.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/settings.php';
-    require_once plugin_dir_path(__FILE__) . 'admin/courses-page.php';
-    require_once plugin_dir_path(__FILE__) . 'admin/lab-launch-shortcode.php';
-    require_once plugin_dir_path(__FILE__) . 'admin/user-statuses-page.php';
+    $load = static function (string $relative_path) use ($plugin_dir): bool {
+        $path = $plugin_dir . $relative_path;
+        if (!is_readable($path)) {
+            return false;
+        }
 
+        require_once $path;
 
+        return true;
+    };
 
+    $load('includes/markdown.php');
+
+    if (!$load('includes/cache.php')) {
+        if (!function_exists('lab_launcher_disable_page_cache')) {
+            function lab_launcher_disable_page_cache()
+            {
+            }
+        }
+        if (!function_exists('lab_launcher_purge_lab_page_cache')) {
+            function lab_launcher_purge_lab_page_cache()
+            {
+            }
+        }
+    }
+
+    $load('includes/shortcode.php');
+    $load('includes/api-caller.php');
+    $load('admin/lab-admin-page.php');
+    $load('includes/settings.php');
+    $load('admin/courses-page.php');
+    $load('admin/lab-launch-shortcode.php');
+    $load('admin/user-statuses-page.php');
 }
 
 add_action('rest_api_init', function () {

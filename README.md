@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.2.0  
+**Verzió:** 1.2.1  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -105,6 +105,8 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Markdown szerkesztő:** Kód és Előnézet fül, WP média picker képbeszúráshoz, oldaltörés gomb
 - **Kódrészlet másolás:** Fenced kódrészleteknél (pl. `bash`, `powershell`) Másolás gomb a parancs vágólapra helyezéséhez
 - **Lapozás görgetés:** Oldalváltáskor automatikus görgetés az oldal első címsorához (`##`, `###`, `####`)
+- **Lab oldal cache kezelés (1.2.1):** A `[lab_launcher]`, `[lab_start]` és `[lab_training]` shortcode-ot tartalmazó oldalak nem kerülnek page cache-be; lab mentéskor automatikus cache purge (WP Rocket, LiteSpeed, W3 Total Cache, WP Super Cache, SiteGround Optimizer)
+- **Markdown linkek új fülön (1.2.1):** A markdown leírásban szereplő linkek mindig új böngészőfülön nyílnak meg (`target="_blank"`, `rel="noopener noreferrer"`)
 
 #### Lab leírás: HTML és Markdown
 
@@ -124,7 +126,7 @@ A két mező egymás mellett marad mentve, így bármikor vissza lehet kapcsolni
 ````markdown
 ## Első lépés
 
-Szöveg **félkövérrel**, `inline kód`.
+Szöveg **félkövérrel**, `inline kód`, [Azure portál](https://portal.azure.com) (új fülön nyílik).
 
 ![Azure portál](https://example.com/kep.png){width=600px}
 
@@ -140,6 +142,7 @@ cd C:\Users\<felhasználónév>\Downloads
 - **Kép mérettel:** `![leírás](url){width=400px}` vagy `{width=50%}` — a média picker automatikusan generálja a szintaxist
 - **Kódrészlet:** `` ```powershell `` … `` ``` `` — a frontenden Másolás gomb jelenik meg; a téma stílusaitól független, dedikált CSS-sel
 - **Placeholderek:** A `<felhasználónév>` jellegű szövegek helyesen jelennek meg Windows-utakban is
+- **Linkek:** `[szöveg](url)` — mindig új böngészőfülön nyílik meg
 
 #### Shortcode használat
 
@@ -162,6 +165,14 @@ Képzés shortcode (kapcsolódó lab-ok listája):
 - **Felhasználói státusz:** Részletes státusz követés felhasználónként és labor típusonként
 - **Shortcode generátor:** Admin felület shortcode-ok egyszerű generálásához
 - **Markdown feldolgozó:** Parsedown alapú renderelés, kódrészletek védelme a WordPress HTML-szűrő elől
+- **Cache kezelő:** Lab oldalak cache-kizárása és mentéskori automatikus purge
+
+#### Verziótörténet
+
+| Verzió | Változások |
+|--------|------------|
+| 1.2.1 | Lab oldalak page cache kizárása; automatikus cache purge lab mentéskor; markdown linkek új fülön nyílnak; biztonságos cache modul betöltés |
+| 1.2.0 | Markdown leírás támogatás (HTML/Markdown mód váltás), markdown szerkesztő előnézettel, kódrészlet másolás, lapozás görgetés |
 
 #### REST API végpontok
 
