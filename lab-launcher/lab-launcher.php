@@ -3,13 +3,13 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.2.1
+ * Version: 1.3.0
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  * Requires at least: 6.2
- * Tested up to: 7.0.0
+ * Tested up to: 7.1.0
  * Requires PHP: 8.0
  * Text Domain: evolvia-lab-launcher
  * Domain Path: /languages
@@ -342,6 +342,12 @@ function lab_launcher_start_lab_rest($request)
         return new WP_REST_Response([
             'message' => $result->get_error_message()
         ], $result->get_error_data()['status'] ?? 500);
+    }
+
+    if (empty($result['username'])) {
+        return new WP_REST_Response([
+            'message' => 'A backend nem adott vissza username-t'
+        ], 502);
     }
 
     lab_launcher_set_status_started_at($lab_launcher_user_email, $lab_id, intval($data['lab_ttl'] ?? 5400));

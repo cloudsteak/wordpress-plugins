@@ -26,6 +26,7 @@ function lab_launcher_register_settings()
     add_settings_field('auth0_client_secret', 'Auth0 client Secret', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'auth0_client_secret']);
     add_settings_field('auth0_audience', 'Auth0 Audience', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'auth0_audience']);
     add_settings_field('backend_url', 'Backend URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'backend_url']);
+    add_settings_field('backend_api_key', 'Backend API key', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'backend_api_key']);
     add_settings_field('azure_login_url', 'Azure login URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'azure_login_url']);
     add_settings_field('aws_login_url', 'AWS login URL', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'aws_login_url']);
     add_settings_field('status_webhook_token', 'Webhook Secret Token', 'lab_launcher_text_field', 'lab-launcher-settings', 'lab_launcher_main_section', ['name' => 'status_webhook_token']);
@@ -38,7 +39,7 @@ function lab_launcher_text_field($args)
     $options = get_option('lab_launcher_settings');
     $name = $args['name'];
     $value = esc_attr($options[$name] ?? '');
-    $type = ($name === 'auth0_client_secret') ? 'password' : 'text';
+    $type = in_array($name, ['auth0_client_secret', 'backend_api_key'], true) ? 'password' : 'text';
     echo "<input type='$type' name='lab_launcher_settings[$name]' value='$value' class='regular-text' />";
 }
 
