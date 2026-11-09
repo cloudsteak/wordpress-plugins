@@ -245,6 +245,8 @@ class CME_Settings {
                         </ul>
                     </div>
 
+                    <?php CME_REST_API::render_settings_box(); ?>
+
                     <div class="cme-settings-box">
                         <h3><?php esc_html_e( 'Themify integráció', 'cloudmentor-events' ); ?></h3>
                         <p><?php esc_html_e( 'A plugin teljes mértékben kompatibilis a Themify témákkal. Használd a shortcode-ot bármely Themify Builder modulban.', 'cloudmentor-events' ); ?></p>

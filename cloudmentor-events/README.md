@@ -74,6 +74,77 @@ Testreszabott megjelenítés:
 2. Húzd a "CloudMentor Események" widgetet a kívánt helyre
 3. Állítsd be a címet és szűrőket
 
+## MCP / REST API integráció
+
+Az események REST API-n keresztül is létrehozhatók, így egy külső MCP szerver (pl. GCP-n futó) tool-ként hívhatja őket, és Claude Desktopból chatből is felvehetők.
+
+```
+Claude Desktop ──MCP──▶ MCP szerver (GCP) ──HTTPS + X-API-Key──▶ WordPress REST API ──▶ cloud_event
+```
+
+### Hitelesítés
+
+- **API kulcs** (ajánlott): **Beállítások > CloudMentor Events > MCP / REST API** → „API kulcs generálása". A kulcs csak egyszer látható, az adatbázisban csak a hash-e tárolódik. Küldés: `X-API-Key: <kulcs>` vagy `Authorization: Bearer <kulcs>`.
+- **WordPress Application Password**: Basic auth olyan felhasználóval, aki szerkeszthet bejegyzést.
+
+Csak HTTPS-en használd. Titkot (Secret Manager) tárold az MCP szerver oldalán.
+
+### Végpontok (`/wp-json/cloudmentor-events/v1`)
+
+| Metódus | Útvonal | Leírás |
+|---------|---------|--------|
+| `POST` | `/events` | Új esemény létrehozása |
+| `GET` | `/events` | Események listázása (`from`, `to`, `category`, `type`, `search`, `limit`) – duplikáció-ellenőrzéshez |
+| `GET` | `/terms` | Érvényes kategóriák, típusok, változás jellegek |
+
+`POST /events` törzs:
+
+| Mező | Kötelező | Leírás |
+|------|----------|--------|
+| `title` | igen | Rövid cím (max. ~50 karakter ajánlott) |
+| `event_date` | igen | `ÉÉÉÉ-HH-NN` vagy `ÉÉÉÉ.HH.NN` |
+| `category` | nem | Platform slug: `azure`, `aws`, `gcp`, `general` |
+| `type` | nem | Típus slug: `uj`, `beallitas`, `biztonsag`, `kivezetes`, `megszunik`, `frissites`, `migracio` |
+| `deadline_type` | nem | `hard` (kritikus), `soft` (ajánlott), `optional` |
+| `description` | nem | Részletes leírás (HTML engedélyezett: `wp_kses_post`) |
+| `source_url` | nem | Hivatalos forrás URL (http/https) |
+| `status` | nem | `publish` (alap) vagy `draft` |
+
+Válaszok: `201` + az esemény adatai; `400` hibás mező (ismeretlen kategória esetén a `valid` listával); `401/403` hitelesítés; `409` már létező (azonos cím + dátum, `id`-val).
+
+```bash
+curl -X POST https://example.com/wp-json/cloudmentor-events/v1/events \
+  -H "X-API-Key: cme_..." -H "Content-Type: application/json" \
+  -d '{"title":"Azure Basic IP kivezetés","event_date":"2026-09-30","category":"azure","type":"kivezetes","deadline_type":"hard","source_url":"https://learn.microsoft.com/..."}'
+```
+
+### MCP tool definíció (az MCP szerverhez)
+
+A tool a fenti `POST /events` hívást végzi. Javasolt input séma:
+
+```json
+{
+  "name": "create_cloud_event",
+  "description": "Cloud/AI technológiai határidő vagy esemény rögzítése a cloudmentor.hu eseménylistájába. A hírből kinyert adatokból hívd.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["title", "event_date"],
+    "properties": {
+      "title": {"type": "string", "description": "Rövid magyar cím, max. 50 karakter"},
+      "event_date": {"type": "string", "description": "Határidő/esemény dátuma, ÉÉÉÉ-HH-NN"},
+      "category": {"type": "string", "enum": ["azure", "aws", "gcp", "general"]},
+      "type": {"type": "string", "enum": ["uj", "beallitas", "biztonsag", "kivezetes", "megszunik", "frissites", "migracio"]},
+      "deadline_type": {"type": "string", "enum": ["hard", "soft", "optional"]},
+      "description": {"type": "string", "description": "Magyar nyelvű leírás: mi változik, mit kell tenni"},
+      "source_url": {"type": "string", "description": "Hivatalos forrás URL"},
+      "status": {"type": "string", "enum": ["publish", "draft"], "default": "draft"}
+    }
+  }
+}
+```
+
+Tipp: a tool alapértelmezetten `draft` státuszt küldhet, így publikálás előtt átnézhető az esemény a WordPress adminban.
+
 ## Testreszabás
 
 ### CSS testreszabás
@@ -144,6 +215,10 @@ add_filter('cme_events_query_args', function($args) {
 - Tesztelve: WordPress 6.7.2
 
 ## Changelog
+
+### 1.1.0
+- REST API: események létrehozása/listázása (`cloudmentor-events/v1`), MCP szerver integrációhoz
+- API kulcs kezelés a beállítások oldalon
 
 ### 1.0.7
 - Egyszerűsített nézet: csak vertikális elrendezés
