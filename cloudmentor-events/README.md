@@ -249,7 +249,9 @@ add_filter('cme_events_query_args', function($args) {
 - Az API-t használó integrációk (MCP tool) sémáját frissíteni kell: `todo` kötelező mező
 
 ### 1.0.8
-- Verziófrissítés
+- Mai esemény pulzáló animációjának finomítása (kártya és dátum)
+- Sürgősség és relatív idő számításának javítása
+- Build folyamat: ZIP elnevezés, `.DS_Store` kizárása
 
 ### 1.0.7
 - Egyszerűsített nézet: csak vertikális elrendezés
