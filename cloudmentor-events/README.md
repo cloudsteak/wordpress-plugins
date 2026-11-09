@@ -237,13 +237,16 @@ add_filter('cme_events_query_args', function($args) {
 
 ## Changelog
 
-### 1.2.0
-- Esemény szerkezet: `description` (felvezető) + Határidő sor + `todo` (Mi a teendő?, kötelező) + `comment` (opcionális)
-- Régi, csak leírással rendelkező események változatlanul jelennek meg
-
-### 1.1.0
-- REST API: események létrehozása/listázása (`cloudmentor-events/v1`), MCP szerver integrációhoz
+### 2.0.0 (breaking change)
+- Az esemény szerkezete bővült: `description` (csak felvezető szöveg), Határidő sor, `todo` (Mi a teendő?, HTML, **kötelező** új eseményeknél) és `comment` (opcionális)
+- Új REST API (`cloudmentor-events/v1`): események létrehozása/listázása, MCP szerver integrációhoz
 - API kulcs kezelés a beállítások oldalon
+- Régi, csak leírással rendelkező események változatlanul jelennek meg, szerkesztésükkor a `todo` nem kötelező
+
+#### Migráció 1.x → 2.0
+- A leírásba eddig írt teljes szöveg a régi eseményeknél a helyén marad, külön teendő nincs
+- Új események létrehozásakor (admin vagy API) a `todo` megadása kötelező, a `description` már csak a felvezető szöveget tartalmazza (a határidőt és a teendőket külön mezőbe kell írni)
+- Az API-t használó integrációk (MCP tool) sémáját frissíteni kell: `todo` kötelező mező
 
 ### 1.0.8
 - Verziófrissítés

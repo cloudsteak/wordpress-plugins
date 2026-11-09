@@ -8,7 +8,7 @@ Ez a tárhely különböző WordPress bővítményeket tartalmaz, amelyek külö
 
 ### 1. CloudMentor Events
 
-**Verzió:** 1.2.0  
+**Verzió:** 2.0.0  
 **Leírás:** Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
 
 #### Funkciók
@@ -49,8 +49,7 @@ Widget formában a sidebar-ban is használható a "CloudMentor Events" widget ho
 
 | Verzió | Változások |
 |--------|------------|
-| 1.2.0 | Esemény szerkezet bővítése: `description` (felvezető), Határidő sor, `todo` (Mi a teendő?, kötelező új eseményeknél), `comment` (opcionális); régi események változatlanok |
-| 1.1.0 | REST API (`cloudmentor-events/v1`): események létrehozása/listázása, API kulcs kezelés a beállítások oldalon, MCP szerver integráció |
+| 2.0.0 | **Breaking change:** az esemény szerkezete bővült: `description` (csak felvezető), Határidő sor, `todo` (Mi a teendő?, kötelező új eseményeknél), `comment` (opcionális); új REST API (`cloudmentor-events/v1`) és API kulcs kezelés MCP szerver integrációhoz. A régi események változatlanul jelennek meg |
 
 #### REST API végpontok
 
