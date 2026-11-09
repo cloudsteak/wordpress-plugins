@@ -17,6 +17,8 @@ A CloudMentor Events plugin lehetővé teszi, hogy közelgő technológiai hatá
 - **Platform kategóriák**: Azure, AWS, GCP és egyéb platformok szűrése
 - **Esemény típusok**: Új, Beállítás, Biztonság, Kivezetés, Megszűnik, stb.
 - **Soft/Hard határidők**: Megkülönböztethető ajánlott és kötelező határidők
+- **Strukturált részletek**: Felvezető leírás, Határidő sor, „Mi a teendő?” és opcionális megjegyzés
+- **REST API / MCP**: Események létrehozása külső MCP szerverből (pl. Claude Desktop), API kulccsal
 - **Kompakt nézet**: Kattintásra lenyíló részletek
 - **Widget támogatás**: Sidebar-ban is elhelyezhető
 - **Shortcode**: Rugalmas beillesztés bárhová
@@ -37,11 +39,14 @@ A CloudMentor Events plugin lehetővé teszi, hogy közelgő technológiai hatá
 
 1. Menj a **Cloud Események > Új hozzáadása** menüpontra
 2. Add meg az esemény címét (max. 50 karakter ajánlott)
-3. Állítsd be a határidő dátumát
-4. Válaszd ki a Platform Kategóriát (pl. Azure)
-5. Válaszd ki az Esemény Típust (pl. Biztonság)
-6. Opcionálisan add meg a részletes leírást és forrás URL-t
-7. Publikáld az eseményt
+3. Válaszd ki a Platform Kategóriát (pl. Azure) és az Esemény Típust (pl. Biztonság)
+4. Írd meg a **Leírást** (rövid felvezető szöveg)
+5. Állítsd be a **határidő** dátumát (a leírás után „📅 Határidő:” sorként jelenik meg)
+6. Töltsd ki a **Mi a teendő?** mezőt (kötelező; szöveg, felsorolás vagy számozott lista)
+7. Opcionálisan add meg a **Megjegyzést** (a teendők után jelenik meg) és a forrás URL-t
+8. Publikáld az eseményt
+
+A régi, csak leírással rendelkező események változatlanul jelennek meg, szerkesztésükkor a „Mi a teendő?” nem kötelező.
 
 ### Shortcode használata
 
@@ -164,7 +169,10 @@ A plugin CSS osztályai:
 .cme-event-type           /* Típus badge */
 .cme-event-title          /* Esemény címe */
 .cme-event-details        /* Lenyíló részletek */
-.cme-event-description    /* Leírás */
+.cme-event-description    /* Leírás (felvezető) */
+.cme-event-deadline-line  /* „Határidő:” sor */
+.cme-event-todo           /* „Mi a teendő?” blokk */
+.cme-event-comment        /* Megjegyzés */
 .cme-source-link          /* Forrás link */
 ```
 
@@ -202,6 +210,15 @@ $(document).on('cme:toggle', function(e, data) {
 });
 ```
 
+### Action hookok
+
+```php
+// Esemény REST API-n keresztüli létrehozása után
+add_action('cme_event_created_via_api', function($post_id, $request) {
+    // pl. értesítés küldése
+}, 10, 2);
+```
+
 ### Filter hookok
 
 ```php
@@ -227,6 +244,9 @@ add_filter('cme_events_query_args', function($args) {
 ### 1.1.0
 - REST API: események létrehozása/listázása (`cloudmentor-events/v1`), MCP szerver integrációhoz
 - API kulcs kezelés a beállítások oldalon
+
+### 1.0.8
+- Verziófrissítés
 
 ### 1.0.7
 - Egyszerűsített nézet: csak vertikális elrendezés

@@ -5,7 +5,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: CloudMentor Events 1.0.8\n"
+"Project-Id-Version: CloudMentor Events 1.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/cloudsteak/wordpress-plugins/cloudmentor-events\n"
 "POT-Creation-Date: 2026-01-30 12:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -186,4 +186,56 @@ msgstr ""
 
 #: assets/js/frontend.js
 msgid "Részletek elrejtése"
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "Érvénytelen API kulcs."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "Hitelesítés szükséges."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "A cím kötelező."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "Érvénytelen dátum. Használj ÉÉÉÉ-HH-NN vagy ÉÉÉÉ.HH.NN formátumot."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "A „todo” (Mi a teendő?) mező kötelező."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "Ilyen című és dátumú esemény már létezik."
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "MCP / REST API"
+msgstr ""
+
+#: includes/class-cme-rest-api.php
+msgid "API kulcs generálása"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Leírás (felvezető szöveg)"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php, includes/class-cme-shortcode.php
+msgid "Mi a teendő?"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "Megjegyzés"
+msgstr ""
+
+#: includes/class-cme-meta-boxes.php
+msgid "A „Mi a teendő?” mező kötelező, ezért az esemény piszkozat maradt."
+msgstr ""
+
+#: includes/class-cme-shortcode.php
+msgid "Határidő"
 msgstr ""
