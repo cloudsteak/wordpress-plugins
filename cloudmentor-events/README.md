@@ -106,7 +106,9 @@ Csak HTTPS-en használd. Titkot (Secret Manager) tárold az MCP szerver oldalán
 | `category` | nem | Platform slug: `azure`, `aws`, `gcp`, `general` |
 | `type` | nem | Típus slug: `uj`, `beallitas`, `biztonsag`, `kivezetes`, `megszunik`, `frissites`, `migracio` |
 | `deadline_type` | nem | `hard` (kritikus), `soft` (ajánlott), `optional` |
-| `description` | nem | Részletes leírás (HTML engedélyezett: `wp_kses_post`) |
+| `description` | nem | Rövid felvezető szöveg (a „Határidő” sor előtti rész) |
+| `todo` | igen | „Mi a teendő?” – HTML (szöveg, felsorolás, számozás) |
+| `comment` | nem | Opcionális megjegyzés, a teendők után jelenik meg |
 | `source_url` | nem | Hivatalos forrás URL (http/https) |
 | `status` | nem | `publish` (alap) vagy `draft` |
 
@@ -128,14 +130,16 @@ A tool a fenti `POST /events` hívást végzi. Javasolt input séma:
   "description": "Cloud/AI technológiai határidő vagy esemény rögzítése a cloudmentor.hu eseménylistájába. A hírből kinyert adatokból hívd.",
   "inputSchema": {
     "type": "object",
-    "required": ["title", "event_date"],
+    "required": ["title", "event_date", "todo"],
     "properties": {
       "title": {"type": "string", "description": "Rövid magyar cím, max. 50 karakter"},
       "event_date": {"type": "string", "description": "Határidő/esemény dátuma, ÉÉÉÉ-HH-NN"},
       "category": {"type": "string", "enum": ["azure", "aws", "gcp", "general"]},
       "type": {"type": "string", "enum": ["uj", "beallitas", "biztonsag", "kivezetes", "megszunik", "frissites", "migracio"]},
       "deadline_type": {"type": "string", "enum": ["hard", "soft", "optional"]},
-      "description": {"type": "string", "description": "Magyar nyelvű leírás: mi változik, mit kell tenni"},
+      "description": {"type": "string", "description": "Rövid magyar felvezető: mi változik és mi a következmény (a határidő nélkül)"},
+      "todo": {"type": "string", "description": "Mi a teendő? HTML: sima szöveg, <ul>/<ol> lista is lehet. Kötelező"},
+      "comment": {"type": "string", "description": "Opcionális megjegyzés (pl. Tracking ID), a teendők után"},
       "source_url": {"type": "string", "description": "Hivatalos forrás URL"},
       "status": {"type": "string", "enum": ["publish", "draft"], "default": "draft"}
     }
@@ -215,6 +219,10 @@ add_filter('cme_events_query_args', function($args) {
 - Tesztelve: WordPress 6.7.2
 
 ## Changelog
+
+### 1.2.0
+- Esemény szerkezet: `description` (felvezető) + Határidő sor + `todo` (Mi a teendő?, kötelező) + `comment` (opcionális)
+- Régi, csak leírással rendelkező események változatlanul jelennek meg
 
 ### 1.1.0
 - REST API: események létrehozása/listázása (`cloudmentor-events/v1`), MCP szerver integrációhoz

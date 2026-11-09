@@ -78,6 +78,8 @@ class CME_REST_API {
             'type'          => array( 'type' => 'string' ),
             'deadline_type' => array( 'type' => 'string', 'enum' => array( 'hard', 'soft', 'optional' ) ),
             'description'   => array( 'type' => 'string' ),
+            'todo'          => array( 'type' => 'string', 'required' => true ),
+            'comment'       => array( 'type' => 'string' ),
             'source_url'    => array( 'type' => 'string' ),
             'status'        => array( 'type' => 'string', 'enum' => array( 'publish', 'draft' ), 'default' => 'publish' ),
         );
@@ -130,6 +132,11 @@ class CME_REST_API {
         $date = $this->normalize_date( (string) $request->get_param( 'event_date' ) );
         if ( ! $date ) {
             return new WP_Error( 'cme_invalid_date', __( 'Érvénytelen dátum. Használj ÉÉÉÉ-HH-NN vagy ÉÉÉÉ.HH.NN formátumot.', 'cloudmentor-events' ), array( 'status' => 400 ) );
+        }
+
+        $todo = wp_kses_post( (string) $request->get_param( 'todo' ) );
+        if ( '' === trim( wp_strip_all_tags( $todo ) ) ) {
+            return new WP_Error( 'cme_invalid_todo', __( 'A „todo” (Mi a teendő?) mező kötelező.', 'cloudmentor-events' ), array( 'status' => 400 ) );
         }
 
         $source_url = '';
@@ -195,6 +202,10 @@ class CME_REST_API {
         }
         if ( null !== $request->get_param( 'description' ) ) {
             update_post_meta( $post_id, '_cme_description', wp_kses_post( (string) $request->get_param( 'description' ) ) );
+        }
+        update_post_meta( $post_id, '_cme_todo', $todo );
+        if ( null !== $request->get_param( 'comment' ) ) {
+            update_post_meta( $post_id, '_cme_comment', wp_kses_post( (string) $request->get_param( 'comment' ) ) );
         }
         if ( $source_url ) {
             update_post_meta( $post_id, '_cme_source_url', $source_url );
@@ -303,6 +314,8 @@ class CME_REST_API {
             'type'          => is_wp_error( $type ) || ! $type ? null : $type[0],
             'deadline_type' => get_post_meta( $post->ID, '_cme_deadline_type', true ) ?: null,
             'description'   => get_post_meta( $post->ID, '_cme_description', true ),
+            'todo'          => get_post_meta( $post->ID, '_cme_todo', true ),
+            'comment'       => get_post_meta( $post->ID, '_cme_comment', true ),
             'source_url'    => get_post_meta( $post->ID, '_cme_source_url', true ),
             'edit_url'      => current_user_can( 'edit_post', $post->ID ) ? get_edit_post_link( $post->ID, 'raw' ) : null,
         );
