@@ -81,7 +81,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.2.1  
+**Verzió:** 1.3.1  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -107,6 +107,35 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Lapozás görgetés:** Oldalváltáskor automatikus görgetés az oldal első címsorához (`##`, `###`, `####`)
 - **Lab oldal cache kezelés (1.2.1):** A `[lab_launcher]`, `[lab_start]` és `[lab_training]` shortcode-ot tartalmazó oldalak nem kerülnek page cache-be; lab mentéskor automatikus cache purge (WP Rocket, LiteSpeed, W3 Total Cache, WP Super Cache, SiteGround Optimizer)
 - **Markdown linkek új fülön (1.2.1):** A markdown leírásban szereplő linkek mindig új böngészőfülön nyílnak meg (`target="_blank"`, `rel="noopener noreferrer"`)
+- **Backend API key hitelesítés (1.3.x):** A backend kommunikáció kizárólag `X-API-Key` fejléccel történik; Auth0 támogatás eltávolítva
+
+#### Telepítés / frissítés
+
+WordPress **nem a verziószám alapján** frissít, hanem a plugin **mappa + főfájl** elérési útja alapján ismeri fel a bővítményt (`lab-launcher/lab-launcher.php`).
+
+Ha ugyanazt a plugint többször feltöltöd anélkül, hogy a régit törölnéd, a `wp-content/plugins/` alatt több mappa is keletkezhet (`lab-launcher`, `lab-launcher-1`, …). Ilyenkor **ugyanazzal a névvel többször** jelenik meg a listában — ez **nem új plugin a kódban**, hanem **duplikált telepítés**.
+
+**Helyes frissítés:**
+
+1. Kapcsold ki az összes „Evolvia Lab Launcher” példányt
+2. Töröld az összes `lab-launcher*` mappát a `wp-content/plugins/` alól (FTP vagy fájlkezelő)
+3. Telepíts **egy** friss `lab-launcher.zip` csomagot
+4. Kapcsold be — a listában **pontosan egy** sor maradjon
+
+A ZIP gyökérében közvetlenül legyen a `lab-launcher.php` (ne legyen benne extra `lab-launcher/lab-launcher/` beágyazás).
+
+#### Beállítások
+
+A **Cloud Lab → Beállítások** menüpontban:
+
+| Mező | Leírás |
+|------|--------|
+| Backend URL | A lab backend szolgáltatás alap URL-je |
+| Backend API key | Kötelező API kulcs a backend hívásokhoz (`X-API-Key` fejléc) |
+| Azure login URL | Azure portál link a lab felületen |
+| AWS login URL | AWS konzol link a lab felületen |
+| Webhook Secret Token | Státusz webhook hitelesítéshez |
+| Státusz frissítés (mp) | Lab státusz automatikus frissítési intervalluma |
 
 #### Lab leírás: HTML és Markdown
 
@@ -160,7 +189,7 @@ Képzés shortcode (kapcsolódó lab-ok listája):
 
 #### Fő komponensek
 
-- **API hívások:** Biztonságos kommunikáció a CloudMentor backend szolgáltatással
+- **API hívások:** Backend kommunikáció `Backend URL` + `Backend API key` (`X-API-Key`) párossal
 - **Kurzus kezelő:** Admin felület a kurzusok és laborok konfigurálásához
 - **Felhasználói státusz:** Részletes státusz követés felhasználónként és labor típusonként
 - **Shortcode generátor:** Admin felület shortcode-ok egyszerű generálásához
@@ -171,6 +200,8 @@ Képzés shortcode (kapcsolódó lab-ok listája):
 
 | Verzió | Változások |
 |--------|------------|
+| 1.3.1 | Auth0 eltávolítva; API key hitelesítés; cache kezelés; markdown linkek új fülön; biztonságos betöltés és beállítások; dupla telepítés figyelmeztetés |
+| 1.3.0 | Auth0 beállítások és kód eltávolítva; backend hitelesítés kizárólag API key-jel |
 | 1.2.1 | Lab oldalak page cache kizárása; automatikus cache purge lab mentéskor; markdown linkek új fülön nyílnak; biztonságos cache modul betöltés |
 | 1.2.0 | Markdown leírás támogatás (HTML/Markdown mód váltás), markdown szerkesztő előnézettel, kódrészlet másolás, lapozás görgetés |
 
@@ -186,8 +217,8 @@ Képzés shortcode (kapcsolódó lab-ok listája):
 
 - WordPress 6.2 vagy újabb
 - PHP 8.0 vagy újabb
-- Tesztelve WordPress 6.7.2-ig
-- CloudMentor backend szolgáltatás hozzáférés
+- Tesztelve WordPress 7.1.0-ig
+- CloudMentor backend szolgáltatás hozzáférés (Backend URL + API key)
 
 ---
 

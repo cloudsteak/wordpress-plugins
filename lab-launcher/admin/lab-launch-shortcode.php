@@ -1,14 +1,6 @@
 <?php
 // admin/lab-launch-shortcode.php
 
-// E-mail elmentése globálisan INIT alatt
-global $lab_launcher_user_email;
-if (empty($lab_launcher_user_email)) {
-    $current_user = wp_get_current_user();
-    $lab_launcher_user_email = sanitize_email($current_user->user_email ?? '');
-    
-}
-
 add_shortcode('lab_start', function () {
     lab_launcher_disable_page_cache();
 
