@@ -239,6 +239,8 @@ add_filter('cme_events_query_args', function($args) {
 
 ### 2.0.0 (breaking change)
 - Az esemény szerkezete bővült: `description` (csak felvezető szöveg), Határidő sor, `todo` (Mi a teendő?, HTML, **kötelező** új eseményeknél) és `comment` (opcionális)
+- A build ZIP gyökere `cloudmentor-events/`, ezért a WordPress ugyanabba a mappába telepíti a frissítést
+- Ha egy régebbi példány már be van töltve, a második másolat nem deklarálja újra az osztályokat (nincs aktiválási fatal error), és az admin figyelmeztet a duplikált mappákra
 - Új REST API (`cloudmentor-events/v1`): események létrehozása/listázása, MCP szerver integrációhoz
 - API kulcs kezelés a beállítások oldalon
 - Régi, csak leírással rendelkező események változatlanul jelennek meg, szerkesztésükkor a `todo` nem kötelező
