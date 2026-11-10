@@ -49,7 +49,7 @@ Widget formában a sidebar-ban is használható a "CloudMentor Events" widget ho
 
 | Verzió | Változások |
 |--------|------------|
-| 2.0.0 | **Breaking change:** az esemény szerkezete bővült: `description` (csak felvezető), Határidő sor, `todo` (Mi a teendő?, kötelező új eseményeknél), `comment` (opcionális); új REST API (`cloudmentor-events/v1`) és API kulcs kezelés MCP szerver integrációhoz. A régi események változatlanul jelennek meg |
+| 2.0.0 | **Breaking change:** az esemény szerkezete bővült: `description` (csak felvezető), Határidő sor, `todo` (Mi a teendő?, kötelező új eseményeknél), `comment` (opcionális); új REST API (`cloudmentor-events/v1`) és API kulcs kezelés MCP szerver integrációhoz. A régi események változatlanul jelennek meg. A telepítő ZIP a `cloudmentor-events/` mappába csomagol, így a feltöltés a meglévő példányt cseréli |
 
 #### REST API végpontok
 
