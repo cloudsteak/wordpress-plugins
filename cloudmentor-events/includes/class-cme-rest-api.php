@@ -58,7 +58,23 @@ class CME_REST_API {
                     'category' => array( 'type' => 'string' ),
                     'type'     => array( 'type' => 'string' ),
                     'search'   => array( 'type' => 'string' ),
+                    'status'   => array( 'type' => 'string', 'enum' => array( 'draft', 'publish' ) ),
                     'limit'    => array( 'type' => 'integer', 'default' => 20, 'minimum' => 1, 'maximum' => 100 ),
+                ),
+            ),
+        ) );
+
+        register_rest_route( self::NAMESPACE_V1, '/events/publish', array(
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => array( $this, 'publish_drafts' ),
+            'permission_callback' => array( $this, 'check_permission' ),
+            'args'                => array(
+                'ids' => array(
+                    'required' => true,
+                    'type'     => 'array',
+                    'items'    => array( 'type' => 'integer' ),
+                    'minItems' => 1,
+                    'maxItems' => 50,
                 ),
             ),
         ) );
@@ -240,9 +256,10 @@ class CME_REST_API {
     }
 
     public function list_events( WP_REST_Request $request ) {
-        $args = array(
+        $status = $request->get_param( 'status' );
+        $args   = array(
             'post_type'      => 'cloud_event',
-            'post_status'    => array( 'publish', 'draft' ),
+            'post_status'    => in_array( $status, array( 'draft', 'publish' ), true ) ? $status : array( 'publish', 'draft' ),
             'posts_per_page' => min( 100, max( 1, (int) ( $request->get_param( 'limit' ) ?: 20 ) ) ),
             'meta_key'       => '_cme_event_date',
             'orderby'        => 'meta_value',
@@ -275,6 +292,82 @@ class CME_REST_API {
 
         $items = array_map( array( $this, 'format_event' ), get_posts( $args ) );
         return rest_ensure_response( array( 'count' => count( $items ), 'events' => $items ) );
+    }
+
+    /**
+     * Publish one or more draft events. Other fields stay unchanged.
+     */
+    public function publish_drafts( WP_REST_Request $request ) {
+        $raw = $request->get_param( 'ids' );
+        if ( ! is_array( $raw ) || ! $raw ) {
+            return new WP_Error( 'cme_invalid_ids', __( 'Legalább egy eseményazonosító kell.', 'cloudmentor-events' ), array( 'status' => 400 ) );
+        }
+
+        $ids = array();
+        foreach ( $raw as $id ) {
+            $id = absint( $id );
+            if ( $id ) {
+                $ids[] = $id;
+            }
+        }
+        $ids = array_values( array_unique( $ids ) );
+        if ( ! $ids ) {
+            return new WP_Error( 'cme_invalid_ids', __( 'Legalább egy eseményazonosító kell.', 'cloudmentor-events' ), array( 'status' => 400 ) );
+        }
+        if ( count( $ids ) > 50 ) {
+            return new WP_Error( 'cme_too_many_ids', __( 'Egyszerre legfeljebb 50 piszkozat publikálható.', 'cloudmentor-events' ), array( 'status' => 400 ) );
+        }
+
+        $published = array();
+        $skipped   = array();
+        $failed    = array();
+        foreach ( $ids as $id ) {
+            $post = get_post( $id );
+            if ( ! $post || 'cloud_event' !== $post->post_type ) {
+                $failed[] = array(
+                    'id'     => $id,
+                    'reason' => 'not_found',
+                );
+                continue;
+            }
+            if ( 'publish' === $post->post_status ) {
+                $skipped[] = array(
+                    'id'     => $id,
+                    'reason' => 'already_published',
+                );
+                continue;
+            }
+            if ( 'draft' !== $post->post_status ) {
+                $skipped[] = array(
+                    'id'     => $id,
+                    'reason' => 'not_draft',
+                );
+                continue;
+            }
+            $result = wp_update_post(
+                array(
+                    'ID'          => $id,
+                    'post_status' => 'publish',
+                ),
+                true
+            );
+            if ( is_wp_error( $result ) ) {
+                $failed[] = array(
+                    'id'     => $id,
+                    'reason' => $result->get_error_message(),
+                );
+                continue;
+            }
+            $published[] = $this->format_event( get_post( $id ) );
+        }
+
+        return rest_ensure_response(
+            array(
+                'published' => $published,
+                'skipped'   => $skipped,
+                'failed'    => $failed,
+            )
+        );
     }
 
     public function get_terms_list() {

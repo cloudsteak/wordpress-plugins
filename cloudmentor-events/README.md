@@ -99,7 +99,8 @@ Csak HTTPS-en használd. Titkot (Secret Manager) tárold az MCP szerver oldalán
 | Metódus | Útvonal | Leírás |
 |---------|---------|--------|
 | `POST` | `/events` | Új esemény létrehozása |
-| `GET` | `/events` | Események listázása (`from`, `to`, `category`, `type`, `search`, `limit`) – duplikáció-ellenőrzéshez |
+| `GET` | `/events` | Események listázása (`from`, `to`, `category`, `type`, `search`, `status`, `limit`). A `status` értéke `draft` vagy `publish` |
+| `POST` | `/events/publish` | Egy vagy több piszkozat publikálása. Törzs: `{"ids":[1,2]}`. Más mezőt nem módosít. Válasz: `published`, `skipped`, `failed` |
 | `GET` | `/terms` | Érvényes kategóriák, típusok, változás jellegek |
 
 `POST /events` törzs:
