@@ -8,7 +8,7 @@ Ez a tárhely különböző WordPress bővítményeket tartalmaz, amelyek külö
 
 ### 1. CloudMentor Events
 
-**Verzió:** 1.0.8  
+**Verzió:** 2.0.0  
 **Leírás:** Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
 
 #### Funkciók
@@ -17,6 +17,8 @@ Ez a tárhely különböző WordPress bővítményeket tartalmaz, amelyek külö
 - **Platform kategóriák:** Azure, AWS, GCP és egyéb felhő platformok szűrése
 - **Esemény típusok:** Új, Beállítás, Biztonság, Kivezetés, Megszűnik, és egyéb típusok megkülönböztetése
 - **Soft/Hard határidők:** Megkülönböztethető ajánlott és kötelező határidők kezelése
+- **Strukturált esemény:** Felvezető leírás, Határidő sor, „Mi a teendő?” (HTML, kötelező) és opcionális megjegyzés; a régi, csak leírással rendelkező események változatlanul működnek
+- **REST API / MCP integráció:** Események létrehozása és listázása API kulccsal (`/wp-json/cloudmentor-events/v1/events`), külső MCP szerverből (pl. Claude Desktop) is
 - **Kompakt nézet:** Kattintásra lenyíló részletek a jobb áttekinthetőség érdekében
 - **Widget támogatás:** Sidebar-ban is elhelyezhető widget formában
 - **Shortcode támogatás:** Rugalmas beillesztés bárhová shortcode használatával
@@ -42,6 +44,20 @@ Szűrés platform szerint:
 ```
 
 Widget formában a sidebar-ban is használható a "CloudMentor Events" widget hozzáadásával.
+
+#### Verziótörténet
+
+| Verzió | Változások |
+|--------|------------|
+| 2.0.0 | **Breaking change:** az esemény szerkezete bővült: `description` (csak felvezető), Határidő sor, `todo` (Mi a teendő?, kötelező új eseményeknél), `comment` (opcionális); új REST API (`cloudmentor-events/v1`) és API kulcs kezelés MCP szerver integrációhoz. A régi események változatlanul jelennek meg. A telepítő ZIP a `cloudmentor-events/` mappába csomagol, így a feltöltés a meglévő példányt cseréli |
+
+#### REST API végpontok
+
+- `POST /cloudmentor-events/v1/events` - Esemény létrehozása
+- `GET /cloudmentor-events/v1/events` - Események listázása (szűrés: `from`, `to`, `category`, `type`, `search`, `limit`)
+- `GET /cloudmentor-events/v1/terms` - Érvényes kategóriák és típusok
+
+Hitelesítés: `X-API-Key` (vagy `Authorization: Bearer`) fejléc a Beállítások > CloudMentor Events oldalon generált kulccsal, vagy WordPress Application Password. Részletek: `cloudmentor-events/README.md`.
 
 #### Követelmények
 

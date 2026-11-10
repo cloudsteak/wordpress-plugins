@@ -3,7 +3,7 @@
  * Plugin Name: CloudMentor Events
  * Plugin URI: https://github.com/cloudsteak/wordpress-plugins/cloudmentor-events
  * Description: Kompakt eseménylista Cloud és AI technológiai határidők megjelenítéséhez. Themify kompatibilis.
- * Version: 1.0.8
+ * Version: 2.0.0
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: GPL v2 or later
@@ -22,8 +22,59 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Warn when more than one copy of this plugin is installed.
+ *
+ * WordPress identifies a plugin by its folder, not its display name.
+ * A second folder loads the same classes and fatals on activation.
+ */
+if ( ! function_exists( 'cme_duplicate_copy_notice' ) ) {
+    function cme_duplicate_copy_notice() {
+        static $shown = false;
+
+        if ( $shown || ! current_user_can( 'activate_plugins' ) ) {
+            return;
+        }
+
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $copies = array();
+        foreach ( get_plugins() as $file => $data ) {
+            if ( isset( $data['Name'] ) && 'CloudMentor Events' === $data['Name'] ) {
+                $copies[ $file ] = isset( $data['Version'] ) ? $data['Version'] : '';
+            }
+        }
+
+        if ( count( $copies ) < 2 ) {
+            return;
+        }
+
+        $shown = true;
+
+        echo '<div class="notice notice-error"><p>';
+        echo esc_html__( 'A CloudMentor Events több mappában is telepítve van. A WordPress ezeket külön bővítménynek látja. Egyszerre csak egy lehet aktív, különben a bekapcsolás végzetes hibát dob (az osztályok kétszer töltődnek be). Töröld a felesleges mappát, és csak a cloudmentor-events/cloudmentor-events.php példányt hagyd meg.', 'cloudmentor-events' );
+        echo '</p><ul>';
+        foreach ( $copies as $file => $version ) {
+            echo '<li><code>' . esc_html( $file ) . '</code>';
+            if ( '' !== $version ) {
+                echo ' — ' . esc_html( $version );
+            }
+            echo '</li>';
+        }
+        echo '</ul></div>';
+    }
+}
+
+// A copy is already loaded. Skip class declarations so activation does not fatal.
+if ( defined( 'CME_VERSION' ) ) {
+    add_action( 'admin_notices', 'cme_duplicate_copy_notice' );
+    return;
+}
+
 // Plugin constants
-define( 'CME_VERSION', '1.0.8' );
+define( 'CME_VERSION', '2.0.0' );
 define( 'CME_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CME_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'CME_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -65,6 +116,7 @@ final class CloudMentor_Events {
         require_once CME_PLUGIN_DIR . 'includes/class-cme-shortcode.php';
         require_once CME_PLUGIN_DIR . 'includes/class-cme-widget.php';
         require_once CME_PLUGIN_DIR . 'includes/class-cme-settings.php';
+        require_once CME_PLUGIN_DIR . 'includes/class-cme-rest-api.php';
     }
 
     /**
@@ -83,6 +135,8 @@ final class CloudMentor_Events {
 
         // Activation hook
         register_activation_hook( __FILE__, array( $this, 'activate' ) );
+
+        add_action( 'admin_notices', 'cme_duplicate_copy_notice' );
     }
 
     /**

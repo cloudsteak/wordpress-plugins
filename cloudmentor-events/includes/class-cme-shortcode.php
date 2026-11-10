@@ -256,6 +256,8 @@ class CME_Shortcode {
         $description   = get_post_meta( $event->ID, '_cme_description', true );
         $source_url    = get_post_meta( $event->ID, '_cme_source_url', true );
         $deadline_type = get_post_meta( $event->ID, '_cme_deadline_type', true );
+        $todo          = get_post_meta( $event->ID, '_cme_todo', true );
+        $comment       = get_post_meta( $event->ID, '_cme_comment', true );
 
         // Get terms
         $categories = wp_get_post_terms( $event->ID, 'event_category' );
@@ -346,6 +348,24 @@ class CME_Shortcode {
                     </div>
                 <?php endif; ?>
 
+                <?php if ( ! empty( $todo ) ) : ?>
+                    <?php /* Structured event: deadline line + todo + optional comment */ ?>
+                    <?php if ( ! empty( $event_date ) ) : ?>
+                        <div class="cme-event-description cme-event-deadline-line">
+                            <p><span aria-hidden="true">📅</span> <strong><?php esc_html_e( 'Határidő', 'cloudmentor-events' ); ?>:</strong> <?php echo esc_html( $this->format_date( $event_date, 'hungarian_long' ) ); ?></p>
+                        </div>
+                    <?php endif; ?>
+                    <div class="cme-event-description cme-event-todo">
+                        <p><span aria-hidden="true">🛠️</span> <strong><?php esc_html_e( 'Mi a teendő?', 'cloudmentor-events' ); ?></strong></p>
+                        <?php echo wp_kses_post( wpautop( $todo ) ); ?>
+                    </div>
+                    <?php if ( ! empty( $comment ) ) : ?>
+                        <div class="cme-event-description cme-event-comment">
+                            <?php echo wp_kses_post( wpautop( $comment ) ); ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
                 <?php if ( ! empty( $source_url ) ) : ?>
                     <div class="cme-event-source">
                         <a href="<?php echo esc_url( $source_url ); ?>"
@@ -416,6 +436,10 @@ class CME_Shortcode {
                         $days
                     );
                 }
+
+            case 'hungarian_long':
+                $months = array( 1 => 'január', 'február', 'március', 'április', 'május', 'június', 'július', 'augusztus', 'szeptember', 'október', 'november', 'december' );
+                return date( 'Y', $timestamp ) . '. ' . $months[ (int) date( 'n', $timestamp ) ] . ' ' . (int) date( 'j', $timestamp ) . '.';
 
             case 'hungarian':
             default:

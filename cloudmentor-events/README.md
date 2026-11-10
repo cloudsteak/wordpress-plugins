@@ -17,6 +17,8 @@ A CloudMentor Events plugin lehetővé teszi, hogy közelgő technológiai hatá
 - **Platform kategóriák**: Azure, AWS, GCP és egyéb platformok szűrése
 - **Esemény típusok**: Új, Beállítás, Biztonság, Kivezetés, Megszűnik, stb.
 - **Soft/Hard határidők**: Megkülönböztethető ajánlott és kötelező határidők
+- **Strukturált részletek**: Felvezető leírás, Határidő sor, „Mi a teendő?” és opcionális megjegyzés
+- **REST API / MCP**: Események létrehozása külső MCP szerverből (pl. Claude Desktop), API kulccsal
 - **Kompakt nézet**: Kattintásra lenyíló részletek
 - **Widget támogatás**: Sidebar-ban is elhelyezhető
 - **Shortcode**: Rugalmas beillesztés bárhová
@@ -37,11 +39,14 @@ A CloudMentor Events plugin lehetővé teszi, hogy közelgő technológiai hatá
 
 1. Menj a **Cloud Események > Új hozzáadása** menüpontra
 2. Add meg az esemény címét (max. 50 karakter ajánlott)
-3. Állítsd be a határidő dátumát
-4. Válaszd ki a Platform Kategóriát (pl. Azure)
-5. Válaszd ki az Esemény Típust (pl. Biztonság)
-6. Opcionálisan add meg a részletes leírást és forrás URL-t
-7. Publikáld az eseményt
+3. Válaszd ki a Platform Kategóriát (pl. Azure) és az Esemény Típust (pl. Biztonság)
+4. Írd meg a **Leírást** (rövid felvezető szöveg)
+5. Állítsd be a **határidő** dátumát (a leírás után „📅 Határidő:” sorként jelenik meg)
+6. Töltsd ki a **Mi a teendő?** mezőt (kötelező; szöveg, felsorolás vagy számozott lista)
+7. Opcionálisan add meg a **Megjegyzést** (a teendők után jelenik meg) és a forrás URL-t
+8. Publikáld az eseményt
+
+A régi, csak leírással rendelkező események változatlanul jelennek meg, szerkesztésükkor a „Mi a teendő?” nem kötelező.
 
 ### Shortcode használata
 
@@ -74,6 +79,82 @@ Testreszabott megjelenítés:
 2. Húzd a "CloudMentor Események" widgetet a kívánt helyre
 3. Állítsd be a címet és szűrőket
 
+## MCP / REST API integráció
+
+Az események REST API-n keresztül is létrehozhatók, így egy külső MCP szerver (pl. GCP-n futó) tool-ként hívhatja őket, és Claude Desktopból chatből is felvehetők.
+
+```
+Claude Desktop ──MCP──▶ MCP szerver (GCP) ──HTTPS + X-API-Key──▶ WordPress REST API ──▶ cloud_event
+```
+
+### Hitelesítés
+
+- **API kulcs** (ajánlott): **Beállítások > CloudMentor Events > MCP / REST API** → „API kulcs generálása". A kulcs csak egyszer látható, az adatbázisban csak a hash-e tárolódik. Küldés: `X-API-Key: <kulcs>` vagy `Authorization: Bearer <kulcs>`.
+- **WordPress Application Password**: Basic auth olyan felhasználóval, aki szerkeszthet bejegyzést.
+
+Csak HTTPS-en használd. Titkot (Secret Manager) tárold az MCP szerver oldalán.
+
+### Végpontok (`/wp-json/cloudmentor-events/v1`)
+
+| Metódus | Útvonal | Leírás |
+|---------|---------|--------|
+| `POST` | `/events` | Új esemény létrehozása |
+| `GET` | `/events` | Események listázása (`from`, `to`, `category`, `type`, `search`, `status`, `limit`). A `status` értéke `draft` vagy `publish` |
+| `POST` | `/events/publish` | Egy vagy több piszkozat publikálása. Törzs: `{"ids":[1,2]}`. Más mezőt nem módosít. Válasz: `published`, `skipped`, `failed` |
+| `GET` | `/terms` | Érvényes kategóriák, típusok, változás jellegek |
+
+`POST /events` törzs:
+
+| Mező | Kötelező | Leírás |
+|------|----------|--------|
+| `title` | igen | Rövid cím (max. ~50 karakter ajánlott) |
+| `event_date` | igen | `ÉÉÉÉ-HH-NN` vagy `ÉÉÉÉ.HH.NN` |
+| `category` | nem | Platform slug: `azure`, `aws`, `gcp`, `general` |
+| `type` | nem | Meglévő típus slug, egy vagy kettő. Új típust nem lehet létrehozni. Slugok: `uj`, `beallitas`, `biztonsag`, `kivezetes`, `megszunik`, `frissites`, `migracio` |
+| `deadline_type` | nem | `hard` (kritikus), `soft` (ajánlott), `optional` |
+| `description` | nem | Rövid felvezető szöveg (a „Határidő” sor előtti rész) |
+| `todo` | igen | „Mi a teendő?” – HTML (szöveg, felsorolás, számozás) |
+| `comment` | nem | Opcionális megjegyzés, a teendők után jelenik meg |
+| `source_url` | nem | Hivatalos forrás URL (http/https) |
+| `status` | nem | `publish` (alap) vagy `draft` |
+
+Válaszok: `201` + az esemény adatai; `400` hibás mező (ismeretlen kategória esetén a `valid` listával); `401/403` hitelesítés; `409` már létező (azonos cím + dátum, `id`-val).
+
+```bash
+curl -X POST https://example.com/wp-json/cloudmentor-events/v1/events \
+  -H "X-API-Key: cme_..." -H "Content-Type: application/json" \
+  -d '{"title":"Azure Basic IP kivezetés","event_date":"2026-09-30","category":"azure","type":"kivezetes","deadline_type":"hard","source_url":"https://learn.microsoft.com/..."}'
+```
+
+### MCP tool definíció (az MCP szerverhez)
+
+A tool a fenti `POST /events` hívást végzi. Javasolt input séma:
+
+```json
+{
+  "name": "create_cloud_event",
+  "description": "Cloud/AI technológiai határidő vagy esemény rögzítése a cloudmentor.hu eseménylistájába. A hírből kinyert adatokból hívd.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["title", "event_date", "todo"],
+    "properties": {
+      "title": {"type": "string", "description": "Rövid magyar cím, max. 50 karakter"},
+      "event_date": {"type": "string", "description": "Határidő/esemény dátuma, ÉÉÉÉ-HH-NN"},
+      "category": {"type": "string", "enum": ["azure", "aws", "gcp", "general"]},
+      "type": {"type": "array", "maxItems": 2, "description": "Meglévő eseménytípusok, legfeljebb 2. Újat ne hozz létre.", "items": {"type": "string", "enum": ["uj", "beallitas", "biztonsag", "kivezetes", "megszunik", "frissites", "migracio"]}},
+      "deadline_type": {"type": "string", "enum": ["hard", "soft", "optional"]},
+      "description": {"type": "string", "description": "Rövid magyar felvezető: mi változik és mi a következmény (a határidő nélkül)"},
+      "todo": {"type": "string", "description": "Mi a teendő? HTML: sima szöveg, <ul>/<ol> lista is lehet. Kötelező"},
+      "comment": {"type": "string", "description": "Opcionális megjegyzés (pl. Tracking ID), a teendők után"},
+      "source_url": {"type": "string", "description": "Hivatalos forrás URL"},
+      "status": {"type": "string", "enum": ["publish", "draft"], "default": "draft"}
+    }
+  }
+}
+```
+
+Tipp: a tool alapértelmezetten `draft` státuszt küldhet, így publikálás előtt átnézhető az esemény a WordPress adminban.
+
 ## Testreszabás
 
 ### CSS testreszabás
@@ -89,7 +170,10 @@ A plugin CSS osztályai:
 .cme-event-type           /* Típus badge */
 .cme-event-title          /* Esemény címe */
 .cme-event-details        /* Lenyíló részletek */
-.cme-event-description    /* Leírás */
+.cme-event-description    /* Leírás (felvezető) */
+.cme-event-deadline-line  /* „Határidő:” sor */
+.cme-event-todo           /* „Mi a teendő?” blokk */
+.cme-event-comment        /* Megjegyzés */
 .cme-source-link          /* Forrás link */
 ```
 
@@ -127,6 +211,15 @@ $(document).on('cme:toggle', function(e, data) {
 });
 ```
 
+### Action hookok
+
+```php
+// Esemény REST API-n keresztüli létrehozása után
+add_action('cme_event_created_via_api', function($post_id, $request) {
+    // pl. értesítés küldése
+}, 10, 2);
+```
+
 ### Filter hookok
 
 ```php
@@ -144,6 +237,24 @@ add_filter('cme_events_query_args', function($args) {
 - Tesztelve: WordPress 6.7.2
 
 ## Changelog
+
+### 2.0.0 (breaking change)
+- Az esemény szerkezete bővült: `description` (csak felvezető szöveg), Határidő sor, `todo` (Mi a teendő?, HTML, **kötelező** új eseményeknél) és `comment` (opcionális)
+- A build ZIP gyökere `cloudmentor-events/`, ezért a WordPress ugyanabba a mappába telepíti a frissítést
+- Ha egy régebbi példány már be van töltve, a második másolat nem deklarálja újra az osztályokat (nincs aktiválási fatal error), és az admin figyelmeztet a duplikált mappákra
+- Új REST API (`cloudmentor-events/v1`): események létrehozása/listázása, MCP szerver integrációhoz
+- API kulcs kezelés a beállítások oldalon
+- Régi, csak leírással rendelkező események változatlanul jelennek meg, szerkesztésükkor a `todo` nem kötelező
+
+#### Migráció 1.x → 2.0
+- A leírásba eddig írt teljes szöveg a régi eseményeknél a helyén marad, külön teendő nincs
+- Új események létrehozásakor (admin vagy API) a `todo` megadása kötelező, a `description` már csak a felvezető szöveget tartalmazza (a határidőt és a teendőket külön mezőbe kell írni)
+- Az API-t használó integrációk (MCP tool) sémáját frissíteni kell: `todo` kötelező mező
+
+### 1.0.8
+- Mai esemény pulzáló animációjának finomítása (kártya és dátum)
+- Sürgősség és relatív idő számításának javítása
+- Build folyamat: ZIP elnevezés, `.DS_Store` kizárása
 
 ### 1.0.7
 - Egyszerűsített nézet: csak vertikális elrendezés

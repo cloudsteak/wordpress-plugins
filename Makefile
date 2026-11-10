@@ -74,7 +74,8 @@ build:
 		rm "$$zip_name"; \
 		echo "$(YELLOW)Korábbi ZIP fájl törölve.$(NC)"; \
 	fi; \
-	zip -r "$$zip_name" "$$selected_plugin" -x "*.git*" -x "*__MACOSX*" -x "*.DS_Store" > /dev/null; \
+	zip -r "$$zip_name" "$$selected_plugin" \
+		-x "*/.git/*" -x "*/.gitignore" -x "*/.DS_Store" -x "*__MACOSX*" -x "*/.vscode/*" > /dev/null; \
 	if [ $$? -eq 0 ]; then \
 		echo "$(GREEN)✓ Sikeres!$(NC) A ZIP fájl elkészült: $$zip_name"; \
 	else \
