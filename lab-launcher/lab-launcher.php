@@ -3,7 +3,7 @@
  * Plugin Name: Evolvia Lab Launcher (CloudMentor)
  * Plugin URI: https://github.com/the1bit/student-lab-backend/tree/main/wordpress/lab-launcher
  * Description: WordPress plugin a Evolvia Lab indításhoz (Azure, AWS).
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: CloudMentor
  * Author URI: https://cloudmentor.hu
  * License: MIT
@@ -15,6 +15,9 @@
  * Domain Path: /languages
  */
 
+if (!defined('LAB_LAUNCHER_PLUGIN_FILE')) {
+    define('LAB_LAUNCHER_PLUGIN_FILE', __FILE__);
+}
 
 // Enqueue fájl közvetlenül a fájl elején fusson
 require_once plugin_dir_path(__FILE__) . 'includes/enqueue.php';
@@ -26,41 +29,57 @@ require_once plugin_dir_path(__FILE__) . 'includes/enqueue.php';
 add_action('plugins_loaded', 'lab_launcher_init');
 function lab_launcher_init()
 {
-    $plugin_dir = plugin_dir_path(__FILE__);
+    $dir = plugin_dir_path(__FILE__);
 
-    $load = static function (string $relative_path) use ($plugin_dir): bool {
-        $path = $plugin_dir . $relative_path;
-        if (!is_readable($path)) {
-            return false;
-        }
+    require_once $dir . 'includes/markdown.php';
+    require_once $dir . 'includes/cache.php';
+    require_once $dir . 'includes/shortcode.php';
+    require_once $dir . 'includes/api-caller.php';
+    require_once $dir . 'admin/lab-admin-page.php';
+    require_once $dir . 'includes/settings.php';
+    require_once $dir . 'admin/courses-page.php';
+    require_once $dir . 'admin/lab-launch-shortcode.php';
+    require_once $dir . 'admin/user-statuses-page.php';
 
-        require_once $path;
+    lab_launcher_admin_install_notices();
+}
 
-        return true;
-    };
-
-    $load('includes/markdown.php');
-
-    if (!$load('includes/cache.php')) {
-        if (!function_exists('lab_launcher_disable_page_cache')) {
-            function lab_launcher_disable_page_cache()
-            {
-            }
-        }
-        if (!function_exists('lab_launcher_purge_lab_page_cache')) {
-            function lab_launcher_purge_lab_page_cache()
-            {
-            }
-        }
+function lab_launcher_admin_install_notices()
+{
+    if (!is_admin()) {
+        return;
     }
 
-    $load('includes/shortcode.php');
-    $load('includes/api-caller.php');
-    $load('admin/lab-admin-page.php');
-    $load('includes/settings.php');
-    $load('admin/courses-page.php');
-    $load('admin/lab-launch-shortcode.php');
-    $load('admin/user-statuses-page.php');
+    add_action('admin_notices', 'lab_launcher_render_duplicate_install_notice');
+}
+
+function lab_launcher_render_duplicate_install_notice()
+{
+    if (!function_exists('get_plugins')) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    $current_basename = plugin_basename(LAB_LAUNCHER_PLUGIN_FILE);
+    $plugin_name = 'Evolvia Lab Launcher (CloudMentor)';
+    $matches = array();
+
+    foreach (get_plugins() as $basename => $data) {
+        if (($data['Name'] ?? '') !== $plugin_name) {
+            continue;
+        }
+        $matches[] = $basename;
+    }
+
+    if (count($matches) < 2) {
+        return;
+    }
+
+    echo '<div class="notice notice-error"><p><strong>Lab Launcher:</strong> ';
+    echo esc_html(sprintf(
+        'Több telepített példány van (%s). Ez nem verziófrissítés — külön mappák. Kapcsold ki mindegyiket, töröld a felesleges mappákat a wp-content/plugins/ alól, majd telepíts egyet.',
+        implode(', ', $matches)
+    ));
+    echo ' Ez a példány: <code>' . esc_html($current_basename) . '</code>.</p></div>';
 }
 
 add_action('rest_api_init', function () {

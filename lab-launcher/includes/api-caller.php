@@ -3,50 +3,17 @@
 
 function lab_launcher_call_backend($payload, $endpoint) {
     $settings = get_option('lab_launcher_settings');
-    $auth0_domain = $settings['auth0_domain'] ?? '';
-    $client_id = $settings['auth0_client_id'] ?? '';
-    $client_secret = $settings['auth0_client_secret'] ?? '';
-    $audience = $settings['auth0_audience'] ?? '';
     $backend_url = $settings['backend_url'] ?? '';
     $backend_api_key = $settings['backend_api_key'] ?? '';
 
-    if (!$backend_url) {
-        return new WP_Error('config_error', 'A plugin nincs megfelelően konfigurálva', array('status' => 500));
+    if (!$backend_url || !$backend_api_key) {
+        return new WP_Error('config_error', 'A plugin nincs megfelelően konfigurálva (backend URL vagy API key hiányzik)', array('status' => 500));
     }
 
-    $headers = array('Content-Type' => 'application/json');
-
-    if ($backend_api_key) {
-        $headers['X-API-Key'] = $backend_api_key;
-    } else {
-        if (!$auth0_domain || !$client_id || !$client_secret || !$audience) {
-            return new WP_Error('config_error', 'A plugin nincs megfelelően konfigurálva', array('status' => 500));
-        }
-
-        $token_response = wp_remote_post("https://$auth0_domain/oauth/token", array(
-            'timeout' => 15,
-            'headers' => array('Content-Type' => 'application/json'),
-            'body' => json_encode(array(
-                'grant_type' => 'client_credentials',
-                'client_id' => $client_id,
-                'client_secret' => $client_secret,
-                'audience' => $audience
-            ))
-        ));
-
-        if (is_wp_error($token_response)) {
-            return new WP_Error('token_error', 'Nem sikerült Auth0 tokent lekérni', array('status' => 500));
-        }
-
-        $token_data = json_decode(wp_remote_retrieve_body($token_response), true);
-        $access_token = $token_data['access_token'] ?? '';
-
-        if (!$access_token) {
-            return new WP_Error('token_empty', 'Hiányzó access token', array('status' => 500));
-        }
-
-        $headers['Authorization'] = 'Bearer ' . $access_token;
-    }
+    $headers = array(
+        'Content-Type' => 'application/json',
+        'X-API-Key' => $backend_api_key,
+    );
 
     $url = trailingslashit($backend_url) . ltrim($endpoint, '/');
     $args = array(
