@@ -109,7 +109,7 @@ Csak HTTPS-en használd. Titkot (Secret Manager) tárold az MCP szerver oldalán
 | `title` | igen | Rövid cím (max. ~50 karakter ajánlott) |
 | `event_date` | igen | `ÉÉÉÉ-HH-NN` vagy `ÉÉÉÉ.HH.NN` |
 | `category` | nem | Platform slug: `azure`, `aws`, `gcp`, `general` |
-| `type` | nem | Típus slug: `uj`, `beallitas`, `biztonsag`, `kivezetes`, `megszunik`, `frissites`, `migracio` |
+| `type` | nem | Meglévő típus slug, egy vagy kettő. Új típust nem lehet létrehozni. Slugok: `uj`, `beallitas`, `biztonsag`, `kivezetes`, `megszunik`, `frissites`, `migracio` |
 | `deadline_type` | nem | `hard` (kritikus), `soft` (ajánlott), `optional` |
 | `description` | nem | Rövid felvezető szöveg (a „Határidő” sor előtti rész) |
 | `todo` | igen | „Mi a teendő?” – HTML (szöveg, felsorolás, számozás) |
@@ -140,7 +140,7 @@ A tool a fenti `POST /events` hívást végzi. Javasolt input séma:
       "title": {"type": "string", "description": "Rövid magyar cím, max. 50 karakter"},
       "event_date": {"type": "string", "description": "Határidő/esemény dátuma, ÉÉÉÉ-HH-NN"},
       "category": {"type": "string", "enum": ["azure", "aws", "gcp", "general"]},
-      "type": {"type": "string", "enum": ["uj", "beallitas", "biztonsag", "kivezetes", "megszunik", "frissites", "migracio"]},
+      "type": {"type": "array", "maxItems": 2, "description": "Meglévő eseménytípusok, legfeljebb 2. Újat ne hozz létre.", "items": {"type": "string", "enum": ["uj", "beallitas", "biztonsag", "kivezetes", "megszunik", "frissites", "migracio"]}},
       "deadline_type": {"type": "string", "enum": ["hard", "soft", "optional"]},
       "description": {"type": "string", "description": "Rövid magyar felvezető: mi változik és mi a következmény (a határidő nélkül)"},
       "todo": {"type": "string", "description": "Mi a teendő? HTML: sima szöveg, <ul>/<ol> lista is lehet. Kötelező"},

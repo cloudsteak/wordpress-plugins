@@ -75,7 +75,26 @@ class CME_REST_API {
             'title'         => array( 'type' => 'string', 'required' => true ),
             'event_date'    => array( 'type' => 'string', 'required' => true ),
             'category'      => array( 'type' => 'string' ),
-            'type'          => array( 'type' => 'string' ),
+            'type'          => array(
+                'description'       => __( 'Meglévő eseménytípus slug, legfeljebb kettő. Új típust nem lehet létrehozni.', 'cloudmentor-events' ),
+                'validate_callback' => static function ( $value ) {
+                    if ( null === $value || '' === $value ) {
+                        return true;
+                    }
+                    if ( is_string( $value ) ) {
+                        return true;
+                    }
+                    if ( ! is_array( $value ) ) {
+                        return false;
+                    }
+                    foreach ( $value as $item ) {
+                        if ( ! is_string( $item ) ) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+            ),
             'deadline_type' => array( 'type' => 'string', 'enum' => array( 'hard', 'soft', 'optional' ) ),
             'description'   => array( 'type' => 'string' ),
             'todo'          => array( 'type' => 'string', 'required' => true ),
@@ -148,23 +167,19 @@ class CME_REST_API {
         }
 
         $terms = array();
-        foreach ( array( 'category' => 'event_category', 'type' => 'event_type' ) as $param => $taxonomy ) {
-            $value = $request->get_param( $param );
-            if ( null === $value || '' === $value ) {
-                continue;
-            }
-            $term = get_term_by( 'slug', sanitize_title( (string) $value ), $taxonomy );
-            if ( ! $term ) {
-                $term = get_term_by( 'name', (string) $value, $taxonomy );
-            }
-            if ( ! $term ) {
-                return new WP_Error(
-                    'cme_unknown_term',
-                    sprintf( /* translators: %s: parameter name */ __( 'Ismeretlen érték: %s', 'cloudmentor-events' ), $param ),
-                    array( 'status' => 400, 'valid' => wp_list_pluck( $this->terms_for( $taxonomy ), 'slug' ) )
-                );
-            }
-            $terms[ $taxonomy ] = (int) $term->term_id;
+        $category_id = $this->resolve_existing_term( $request->get_param( 'category' ), 'event_category', 'category' );
+        if ( is_wp_error( $category_id ) ) {
+            return $category_id;
+        }
+        if ( $category_id ) {
+            $terms['event_category'] = array( $category_id );
+        }
+        $type_ids = $this->resolve_event_types( $request->get_param( 'type' ) );
+        if ( is_wp_error( $type_ids ) ) {
+            return $type_ids;
+        }
+        if ( $type_ids ) {
+            $terms['event_type'] = $type_ids;
         }
 
         // Duplicate protection: same title and date
@@ -210,8 +225,8 @@ class CME_REST_API {
         if ( $source_url ) {
             update_post_meta( $post_id, '_cme_source_url', $source_url );
         }
-        foreach ( $terms as $taxonomy => $term_id ) {
-            wp_set_object_terms( $post_id, array( $term_id ), $taxonomy );
+        foreach ( $terms as $taxonomy => $term_ids ) {
+            wp_set_object_terms( $post_id, $term_ids, $taxonomy );
         }
 
         /**
@@ -278,6 +293,65 @@ class CME_REST_API {
      * Helpers
      * ---------------------------------------------------------------- */
 
+    /**
+     * One existing term. Unknown values are rejected, never created.
+     *
+     * @param mixed  $value    Slug or name.
+     * @param string $taxonomy Taxonomy name.
+     * @param string $param    Request parameter name.
+     * @return int|WP_Error|null Term ID, error, or null when empty.
+     */
+    private function resolve_existing_term( $value, $taxonomy, $param ) {
+        if ( null === $value || '' === $value ) {
+            return null;
+        }
+        $term = get_term_by( 'slug', sanitize_title( (string) $value ), $taxonomy );
+        if ( ! $term ) {
+            $term = get_term_by( 'name', (string) $value, $taxonomy );
+        }
+        if ( ! $term ) {
+            return new WP_Error(
+                'cme_unknown_term',
+                sprintf( /* translators: %s: parameter name */ __( 'Ismeretlen érték: %s. Újat nem lehet létrehozni.', 'cloudmentor-events' ), $param ),
+                array( 'status' => 400, 'valid' => wp_list_pluck( $this->terms_for( $taxonomy ), 'slug' ) )
+            );
+        }
+        return (int) $term->term_id;
+    }
+
+    /**
+     * Up to two existing event types. Unknown values are rejected, never created.
+     *
+     * @param mixed $value A slug, or a list of slugs.
+     * @return int[]|WP_Error
+     */
+    private function resolve_event_types( $value ) {
+        if ( null === $value || '' === $value || array() === $value ) {
+            return array();
+        }
+        $raw = is_array( $value ) ? $value : preg_split( '/\s*,\s*/', (string) $value );
+        $raw = array_values( array_filter( array_map( 'trim', $raw ), 'strlen' ) );
+        $valid = wp_list_pluck( $this->terms_for( 'event_type' ), 'slug' );
+        if ( count( $raw ) > 2 ) {
+            return new WP_Error(
+                'cme_too_many_types',
+                __( 'Legfeljebb 2 eseménytípus adható meg. Új típust nem lehet létrehozni.', 'cloudmentor-events' ),
+                array( 'status' => 400, 'valid' => $valid )
+            );
+        }
+        $ids = array();
+        foreach ( $raw as $item ) {
+            $term_id = $this->resolve_existing_term( $item, 'event_type', 'type' );
+            if ( is_wp_error( $term_id ) ) {
+                return $term_id;
+            }
+            if ( $term_id ) {
+                $ids[] = $term_id;
+            }
+        }
+        return array_values( array_unique( $ids ) );
+    }
+
     private function terms_for( $taxonomy ) {
         $terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) );
         if ( is_wp_error( $terms ) ) {
@@ -311,7 +385,7 @@ class CME_REST_API {
             'status'        => $post->post_status,
             'event_date'    => get_post_meta( $post->ID, '_cme_event_date', true ),
             'category'      => is_wp_error( $cat ) || ! $cat ? null : $cat[0],
-            'type'          => is_wp_error( $type ) || ! $type ? null : $type[0],
+            'type'          => is_wp_error( $type ) || ! $type ? array() : array_values( $type ),
             'deadline_type' => get_post_meta( $post->ID, '_cme_deadline_type', true ) ?: null,
             'description'   => get_post_meta( $post->ID, '_cme_description', true ),
             'todo'          => get_post_meta( $post->ID, '_cme_todo', true ),
