@@ -118,3 +118,96 @@
 .lab-description-md-editor.is-hidden {
     display: none;
 }
+
+.lab-shared-select {
+    position: relative;
+    display: inline-block;
+    width: 25em;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+.lab-shared-select-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 30px;
+    margin: 0;
+    padding: 0 32px 0 8px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    background: #fff;
+    color: #2c3338;
+    font-size: 14px;
+    line-height: 2;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.lab-shared-select-toggle:hover,
+.lab-shared-select-toggle:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.lab-shared-select-toggle::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    margin-top: -2px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #50575e;
+}
+
+.lab-shared-select-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lab-shared-select-menu {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    max-height: 240px;
+    overflow: auto;
+}
+
+.lab-shared-select-menu[hidden] {
+    display: none;
+}
+
+.lab-shared-select-menu li {
+    margin: 0;
+    padding: 6px 12px;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.lab-shared-select-menu li:hover,
+.lab-shared-select-menu li:focus,
+.lab-shared-select-menu li.is-active {
+    background: #f0f6fc;
+    outline: none;
+}
+
+.lab-shared-select-menu li[aria-selected="true"] {
+    font-weight: 600;
+    color: #2271b1;
+}

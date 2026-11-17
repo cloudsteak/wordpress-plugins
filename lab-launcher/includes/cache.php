@@ -213,6 +213,7 @@ function lab_launcher_register_cache_hooks()
     add_action('wp', 'lab_launcher_maybe_disable_page_cache', 1);
     add_action('template_redirect', 'lab_launcher_send_nocache_headers', 0);
     add_action('update_option_lab_launcher_labs', 'lab_launcher_purge_lab_page_cache');
+    add_action('update_option_lab_launcher_shared_parts', 'lab_launcher_purge_lab_page_cache');
 }
 
 add_action('init', 'lab_launcher_register_cache_hooks', 1);

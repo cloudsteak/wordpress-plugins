@@ -24,6 +24,15 @@ function lab_launcher_lab_menu()
         'lab-launcher-labs',
         'lab_launcher_labs_page'
     );
+
+    add_submenu_page(
+        'cloud-lab',
+        'Közös részek',
+        'Közös részek',
+        'edit_posts',
+        'lab-launcher-shared-parts',
+        'lab_launcher_shared_parts_page'
+    );
 }
 
 function lab_launcher_labs_page()
@@ -82,6 +91,7 @@ function lab_launcher_labs_page()
             'description' => $clean_desc,
             'description_md' => $raw_md,
             'use_markdown_description' => $use_markdown,
+            'shared_part_id' => lab_launcher_sanitize_shared_part_id($_POST['shared_part_id'] ?? ''),
             'image_id' => intval($_POST['image_id']),
             'lab_ttl' => intval($_POST['lab_launcher_ttl']) ?: 5400
         );
@@ -159,6 +169,13 @@ function lab_launcher_labs_page()
                             <option value="azure" <?php selected($existing_lab['cloud'] ?? '', 'azure'); ?>>Azure</option>
                         </select>
 
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="shared_part_id">Közös rész</label></th>
+                    <td>
+                        <?php lab_launcher_render_shared_part_select($existing_lab['shared_part_id'] ?? ''); ?>
+                        <p class="description">A kiválasztott Markdown rész a lab első oldalaként jelenik meg, ugyanabban a lapozóban. Üresen hagyva a lab a saját leírásával kezdődik.</p>
                     </td>
                 </tr>
                 <tr>
