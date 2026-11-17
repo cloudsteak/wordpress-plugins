@@ -51,25 +51,43 @@ function lab_launcher_render_shared_part_select($selected_id)
 {
     $selected_id = lab_launcher_normalize_shared_part_id($selected_id);
     $parts = lab_launcher_get_shared_parts();
-
-    echo '<select name="shared_part_id" id="shared_part_id" class="regular-text">';
-    echo '<option value="">— Nincs —</option>';
+    $options = ['' => '— Nincs —'];
 
     foreach ($parts as $id => $part) {
-        $title = is_array($part) ? ($part['title'] ?? $id) : $id;
+        $options[$id] = is_array($part) ? ($part['title'] ?? $id) : $id;
+    }
+
+    $missing_id = ($selected_id !== '' && !isset($options[$selected_id])) ? $selected_id : '';
+    if ($missing_id !== '') {
+        $selected_id = '';
+    }
+    $current_label = $options[$selected_id] ?? '— Nincs —';
+
+    echo '<div class="lab-shared-select">';
+    printf(
+        '<input type="hidden" name="shared_part_id" id="shared_part_id" value="%s">',
+        esc_attr($selected_id)
+    );
+    echo '<button type="button" class="lab-shared-select-toggle" aria-haspopup="listbox" aria-expanded="false">';
+    echo '<span class="lab-shared-select-label">' . esc_html($current_label) . '</span>';
+    echo '</button>';
+    echo '<ul class="lab-shared-select-menu" role="listbox" hidden>';
+
+    foreach ($options as $value => $label) {
         printf(
-            '<option value="%s" %s>%s</option>',
-            esc_attr($id),
-            selected($selected_id, $id, false),
-            esc_html($title)
+            '<li role="option" tabindex="-1" data-value="%s" aria-selected="%s">%s</li>',
+            esc_attr($value),
+            $value === $selected_id ? 'true' : 'false',
+            esc_html($label)
         );
     }
 
-    echo '</select>';
+    echo '</ul>';
+    echo '</div>';
 
-    if ($selected_id !== '' && !isset($parts[$selected_id])) {
+    if ($missing_id !== '') {
         echo '<p class="description" style="color:#b32d2e;">A korábban kiválasztott rész (<code>'
-            . esc_html($selected_id)
+            . esc_html($missing_id)
             . '</code>) már nem létezik. Mentéskor a hivatkozás törlődik, ha nem választasz másikat.</p>';
     }
 }

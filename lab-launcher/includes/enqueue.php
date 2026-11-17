@@ -53,14 +53,14 @@ function lab_launcher_enqueue_admin_assets($hook)
         'lab-markdown-editor',
         $plugin_url . 'admin/lab-markdown-editor.css',
         [],
-        '1.0'
+        '1.4.1'
     );
 
     wp_enqueue_script(
         'lab-markdown-editor',
         $plugin_url . 'admin/lab-markdown-editor.js',
         ['jquery'],
-        '1.0',
+        '1.4.1',
         true
     );
 
