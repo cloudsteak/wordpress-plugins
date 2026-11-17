@@ -39,7 +39,11 @@ function lab_launcher_enqueue_admin_assets($hook)
 {
     lab_launcher_enqueue_assets();
 
-    if ($hook !== 'cloud-lab_page_lab-launcher-labs') {
+    $markdown_editor_hooks = [
+        'cloud-lab_page_lab-launcher-labs',
+        'cloud-lab_page_lab-launcher-shared-parts',
+    ];
+    if (!in_array($hook, $markdown_editor_hooks, true)) {
         return;
     }
 

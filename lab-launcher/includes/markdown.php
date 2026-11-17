@@ -165,8 +165,34 @@ function lab_launcher_parse_markdown($markdown)
     return lab_launcher_add_target_blank_to_links($html);
 }
 
+function lab_launcher_append_description_page(&$output, &$page_index, $page_content, $parse_markdown)
+{
+    if (!is_string($page_content) || !trim($page_content)) {
+        return;
+    }
+
+    $output .= '<div class="lab-page" style="display: none;" data-page="' . $page_index++ . '">';
+    $output .= $parse_markdown ? lab_launcher_parse_markdown($page_content) : $page_content;
+    $output .= '</div>';
+}
+
 function lab_launcher_render_description_pages($lab)
 {
+    $output = '';
+    $page_index = 0;
+
+    $shared_part_id = sanitize_title($lab['shared_part_id'] ?? '');
+    if ($shared_part_id !== '' && function_exists('lab_launcher_get_shared_parts')) {
+        $shared_parts = lab_launcher_get_shared_parts();
+        $shared = $shared_parts[$shared_part_id] ?? null;
+        $shared_content = is_array($shared) ? ($shared['content_md'] ?? '') : '';
+        if (is_string($shared_content) && trim($shared_content) !== '') {
+            foreach (explode('<!-- pagebreak -->', $shared_content) as $page_content) {
+                lab_launcher_append_description_page($output, $page_index, $page_content, true);
+            }
+        }
+    }
+
     $use_markdown = !empty($lab['use_markdown_description']);
 
     if ($use_markdown) {
@@ -177,23 +203,8 @@ function lab_launcher_render_description_pages($lab)
         $pages = explode('<!-- pagebreak -->', wp_kses_post($source));
     }
 
-    $output = '';
-    $page_index = 0;
-
     foreach ($pages as $page_content) {
-        if (!trim($page_content)) {
-            continue;
-        }
-
-        $output .= '<div class="lab-page" style="display: none;" data-page="' . $page_index++ . '">';
-
-        if ($use_markdown) {
-            $output .= lab_launcher_parse_markdown($page_content);
-        } else {
-            $output .= $page_content;
-        }
-
-        $output .= '</div>';
+        lab_launcher_append_description_page($output, $page_index, $page_content, $use_markdown);
     }
 
     return $output;

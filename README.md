@@ -97,7 +97,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 
 ### 3. Lab Launcher (CloudMentor)
 
-**Verzió:** 1.3.1  
+**Verzió:** 1.4.0  
 **Leírás:** CloudMentor Lab indító plugin Azure és AWS felhő platformokhoz
 
 #### Funkciók
@@ -124,6 +124,7 @@ A beállítások a WordPress admin felületen az „Beállítások" > „Content
 - **Lab oldal cache kezelés (1.2.1):** A `[lab_launcher]`, `[lab_start]` és `[lab_training]` shortcode-ot tartalmazó oldalak nem kerülnek page cache-be; lab mentéskor automatikus cache purge (WP Rocket, LiteSpeed, W3 Total Cache, WP Super Cache, SiteGround Optimizer)
 - **Markdown linkek új fülön (1.2.1):** A markdown leírásban szereplő linkek mindig új böngészőfülön nyílnak meg (`target="_blank"`, `rel="noopener noreferrer"`)
 - **Backend API key hitelesítés (1.3.x):** A backend kommunikáció kizárólag `X-API-Key` fejléccel történik; Auth0 támogatás eltávolítva
+- **Közös részek (1.4.0):** Újrafelhasználható Markdown belépési útmutatók a Cloud Lab menüben. A lab szerkesztő legördülőjéből választva a rész a lab lapozójának első oldala lesz
 
 #### Telepítés / frissítés
 
